@@ -1,0 +1,130 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Ornament from '../components/Ornament.astro';
+
+// In-progress works. Add to this list as you start new pieces.
+const works = [
+  {
+    title: 'The Long Hours',
+    kind: 'short story',
+    status: 'in progress',
+    note: "A translator who can't sleep. Started in a Vienna café, still being figured out.",
+  },
+  {
+    title: 'untitled novel',
+    kind: 'novel',
+    status: 'first draft',
+    note: 'Set across three cities and one bad year. Slow.',
+  },
+  {
+    title: 'Coffee Notebook',
+    kind: 'essay collection',
+    status: 'gathering',
+    note: 'A book made out of these journal entries — eventually. The ones that hold up.',
+  },
+];
+---
+
+<BaseLayout title="the books" compact={true}>
+  <article class="books">
+    <header class="books-header">
+      <p class="kicker">the books</p>
+      <h1 class="title">what i'm working on</h1>
+      <p class="subtitle">
+        Stories, essays, and longer pieces — at various stages of finished.
+      </p>
+    </header>
+
+    <Ornament spacing="tight" />
+
+    <div class="works">
+      {
+        works.map((work) => (
+          <article class="work">
+            <p class="kind">
+              <span>{work.kind}</span>
+              <span class="dot">·</span>
+              <span class="status">{work.status}</span>
+            </p>
+            <h2 class="work-title">{work.title}</h2>
+            <p class="note">{work.note}</p>
+          </article>
+        ))
+      }
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .books {
+    max-width: var(--measure);
+    margin-inline: auto;
+    padding: 2rem var(--gutter-wide) 1rem;
+  }
+
+  .books-header { text-align: center; }
+
+  .kicker {
+    font-style: italic;
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    color: var(--c-ink);
+    margin: 0 0 0.85rem;
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--c-espresso);
+    line-height: 1.15;
+    margin: 0 0 0.6rem;
+  }
+
+  .subtitle {
+    font-style: italic;
+    color: var(--c-warm-brown);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .works {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .work {
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 2rem;
+  }
+
+  .work:last-child { border-bottom: none; }
+
+  .kind {
+    font-style: italic;
+    color: var(--c-ink);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    margin: 0 0 0.45rem;
+  }
+
+  .dot { color: var(--c-warm-brown); margin: 0 0.4rem; }
+  .status { color: var(--c-warm-brown); }
+
+  .work-title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.45rem;
+    color: var(--c-espresso);
+    margin: 0 0 0.65rem;
+  }
+
+  .note {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--c-espresso-soft);
+    margin: 0;
+  }
+</style>
