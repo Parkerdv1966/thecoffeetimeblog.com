@@ -1,0 +1,78 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  prev?: CollectionEntry<'entries'>;
+  next?: CollectionEntry<'entries'>;
+}
+
+const { prev, next } = Astro.props;
+---
+
+<nav class="prev-next">
+  <div class="side prev">
+    {
+      prev && (
+        <a href={`/entries/${prev.id}`}>
+          <p class="label">← previous</p>
+          <p class="title">{prev.data.title}</p>
+        </a>
+      )
+    }
+  </div>
+  <div class="side next">
+    {
+      next && (
+        <a href={`/entries/${next.id}`}>
+          <p class="label">next →</p>
+          <p class="title">{next.data.title}</p>
+        </a>
+      )
+    }
+  </div>
+</nav>
+
+<style>
+  .prev-next {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem var(--gutter-wide) 2rem;
+    border-top: 1px solid var(--border-soft);
+    margin-top: 2rem;
+    max-width: var(--measure-wide);
+    margin-inline: auto;
+  }
+
+  .side { max-width: 16rem; }
+  .next { text-align: right; }
+
+  .side a {
+    border: none;
+    color: inherit;
+    display: block;
+  }
+
+  .side a:hover .title {
+    color: var(--c-terracotta-deep);
+  }
+
+  .label {
+    font-style: italic;
+    font-size: 0.78rem;
+    color: var(--c-ink);
+    margin: 0 0 0.3rem;
+    letter-spacing: 0.04em;
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--c-espresso);
+    margin: 0;
+    line-height: 1.3;
+    transition: color 0.2s ease;
+  }
+</style>

@@ -1,0 +1,24 @@
+---
+interface Props {
+  spacing?: 'tight' | 'normal' | 'wide';
+}
+
+const { spacing = 'normal' } = Astro.props;
+---
+
+<div class:list={['ornament', `ornament--${spacing}`]}>· · ·</div>
+
+<style>
+  .ornament {
+    text-align: center;
+    color: var(--c-warm-brown);
+    font-style: italic;
+    letter-spacing: 0.5em;
+    font-size: 0.95rem;
+    user-select: none;
+    margin-inline: auto;
+  }
+  .ornament--tight   { margin-block: 1rem; }
+  .ornament--normal  { margin-block: 2rem; }
+  .ornament--wide    { margin-block: 3rem; }
+</style>

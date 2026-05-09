@@ -1,141 +1,239 @@
-/*
-  The CSS in this style tag is based off of Bear Blog's default CSS.
-  https://github.com/HermanMartinus/bearblog/blob/297026a877bc2ab2b3bdfbd6b9f7961c350917dd/templates/styles/blog/default.css
-  License MIT: https://github.com/HermanMartinus/bearblog/blob/master/LICENSE.md
- */
+/* ----------------------------------------------------------------
+   the coffee time blog — global styles
+   Coffee Notebook direction (v2 palette)
+   ---------------------------------------------------------------- */
 
 :root {
-	--accent: #2337ff;
-	--accent-dark: #000d8a;
-	--black: 15, 18, 25;
-	--gray: 96, 115, 159;
-	--gray-light: 229, 233, 240;
-	--gray-dark: 34, 41, 57;
-	--gray-gradient: rgba(var(--gray-light), 50%), #fff;
-	--box-shadow:
-		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),
-		0 16px 32px rgba(var(--gray), 33%);
-}
-body {
-	font-family: var(--font-atkinson);
-	margin: 0;
-	padding: 0;
-	text-align: left;
-	background: linear-gradient(var(--gray-gradient)) no-repeat;
-	background-size: 100% 600px;
-	word-wrap: break-word;
-	overflow-wrap: break-word;
-	color: rgb(var(--gray-dark));
-	font-size: 20px;
-	line-height: 1.7;
-}
-main {
-	width: 720px;
-	max-width: calc(100% - 2em);
-	margin: auto;
-	padding: 3em 1em;
-}
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	margin: 0 0 0.5rem 0;
-	color: rgb(var(--black));
-	line-height: 1.2;
-}
-h1 {
-	font-size: 3.052em;
-}
-h2 {
-	font-size: 2.441em;
-}
-h3 {
-	font-size: 1.953em;
-}
-h4 {
-	font-size: 1.563em;
-}
-h5 {
-	font-size: 1.25em;
-}
-strong,
-b {
-	font-weight: 700;
-}
-a {
-	color: var(--accent);
-}
-a:hover {
-	color: var(--accent);
-}
-p {
-	margin-bottom: 1em;
-}
-.prose p {
-	margin-bottom: 2em;
-}
-textarea {
-	width: 100%;
-	font-size: 16px;
-}
-input {
-	font-size: 16px;
-}
-table {
-	width: 100%;
-}
-img {
-	max-width: 100%;
-	height: auto;
-	border-radius: 8px;
-}
-code {
-	padding: 2px 5px;
-	background-color: rgb(var(--gray-light));
-	border-radius: 2px;
-}
-pre {
-	padding: 1.5em;
-	border-radius: 8px;
-}
-pre > code {
-	all: unset;
-}
-blockquote {
-	border-left: 4px solid var(--accent);
-	padding: 0 0 0 20px;
-	margin: 0;
-	font-size: 1.333em;
-}
-hr {
-	border: none;
-	border-top: 1px solid rgb(var(--gray-light));
-}
-@media (max-width: 720px) {
-	body {
-		font-size: 18px;
-	}
-	main {
-		padding: 1em;
-	}
+  /* --- Backgrounds & cream tones --- */
+  --c-cream:        #F1E6CC;  /* page background — warm cream paper */
+  --c-cream-deep:   #E8DCBE;  /* recessed surfaces */
+  --c-cream-soft:   #FAEFD9;  /* slightly lighter cream for cards */
+
+  /* --- Text & coffee depth --- */
+  --c-espresso:       #4A2818;  /* primary text */
+  --c-espresso-soft:  #5B3A22;  /* secondary text, body emphasis */
+  --c-warm-brown:     #8B6038;  /* metadata, footer, captions */
+
+  /* --- Ink (writing/manuscript accent) --- */
+  --c-ink: #1F2B45;   /* dates, italic notes, pull quotes */
+
+  /* --- Travel: sunset/adventure --- */
+  --c-terracotta:        #C46B47;
+  --c-terracotta-deep:   #8B3D2A;
+  --c-terracotta-shadow: #6B2A1F;
+  --c-terracotta-light:  #E8B68C;
+
+  /* --- Travel: foliage and water --- */
+  --c-sage:  #6B7F5C;
+  --c-ocean: #4A6478;
+
+  /* --- Golden hour --- */
+  --c-gold:  #C9A661;
+  --c-amber: #A07F3E;
+
+  /* --- Borders --- */
+  --border-soft:   rgba(74, 40, 24, 0.15);
+  --border-medium: rgba(74, 40, 24, 0.25);
+  --border-ink:    rgba(31, 43, 69, 0.25);
+
+  /* --- Typography --- */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body:    'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-system:  -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  /* --- Layout --- */
+  --measure:      36rem;  /* readable line length for body */
+  --measure-wide: 44rem;
+  --gutter:       1.5rem;
+  --gutter-wide:  2.5rem;
 }
 
-.sr-only {
-	border: 0;
-	padding: 0;
-	margin: 0;
-	position: absolute !important;
-	height: 1px;
-	width: 1px;
-	overflow: hidden;
-	/* IE6, IE7 - a 0 height clip, off to the bottom right of the visible 1px box */
-	clip: rect(1px 1px 1px 1px);
-	/* maybe deprecated but we need to support legacy browsers */
-	clip: rect(1px, 1px, 1px, 1px);
-	/* modern browsers, clip-path works inwards from each corner */
-	clip-path: inset(50%);
-	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
-	white-space: nowrap;
+/* --- Reset / base ------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--c-espresso);
+  background: var(--c-cream);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Fraunces optical-size axis — let the browser pick scale */
+html { font-optical-sizing: auto; }
+
+/* --- Typography defaults ---------------------------------------- */
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--c-espresso);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  margin: 0;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.2rem; }
+
+p {
+  margin: 0 0 1.1em;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--c-espresso);
+}
+
+a {
+  color: var(--c-ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-ink);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+a:hover {
+  color: var(--c-terracotta-deep);
+  border-bottom-color: var(--c-terracotta);
+}
+
+em, i { font-style: italic; }
+strong, b { font-weight: 600; }
+
+::selection {
+  background: var(--c-terracotta-light);
+  color: var(--c-espresso);
+}
+
+/* --- Helpers ----------------------------------------------------- */
+
+.measure { max-width: var(--measure); margin-inline: auto; }
+.measure-wide { max-width: var(--measure-wide); margin-inline: auto; }
+
+.italic-meta {
+  font-style: italic;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--c-ink);
+}
+
+.ornament {
+  text-align: center;
+  color: var(--c-warm-brown);
+  font-style: italic;
+  letter-spacing: 0.5em;
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+/* --- Hero palettes (used when no real photo is supplied) -------- */
+
+.hero {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.hero--terracotta { background: var(--c-terracotta); }
+.hero--terracotta::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 32%;
+  background: var(--c-terracotta-deep);
+}
+.hero--terracotta::before {
+  content: '';
+  position: absolute;
+  left: 70%; top: 22%;
+  width: 9%; aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--c-terracotta-light);
+}
+
+.hero--sage   { background: var(--c-sage);   }
+.hero--ocean  { background: var(--c-ocean);  }
+.hero--gold   { background: var(--c-gold);   }
+.hero--espresso { background: var(--c-espresso-soft); }
+
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* --- Article prose ---------------------------------------------- */
+
+.prose p {
+  font-size: 1.05rem;
+  line-height: 1.85;
+}
+
+.prose blockquote {
+  border: none;
+  margin: 2rem 0;
+  padding: 0;
+  text-align: center;
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--c-ink);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.prose blockquote p { color: inherit; font-size: inherit; line-height: inherit; }
+
+.prose figure {
+  margin: 2rem 0;
+}
+
+.prose figcaption {
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--c-warm-brown);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.prose hr {
+  border: none;
+  text-align: center;
+  margin: 2.5rem 0;
+}
+
+.prose hr::before {
+  content: '· · ·';
+  letter-spacing: 0.5em;
+  color: var(--c-warm-brown);
+  font-style: italic;
+}
+
+/* --- Responsive -------------------------------------------------- */
+
+@media (max-width: 640px) {
+  html { font-size: 16px; }
+  h1 { font-size: 1.6rem; }
+  :root {
+    --gutter:      1rem;
+    --gutter-wide: 1.25rem;
+  }
 }

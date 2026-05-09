@@ -1,0 +1,96 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import PrevNext from '../components/PrevNext.astro';
+import Ornament from '../components/Ornament.astro';
+import { formatDateline } from '../lib/format';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'entries'>;
+  prev?: CollectionEntry<'entries'>;
+  next?: CollectionEntry<'entries'>;
+}
+
+const { entry, prev, next } = Astro.props;
+const { title, dek, publishDate, location, heroPalette } = entry.data;
+const dateline = formatDateline(publishDate, location);
+---
+
+<BaseLayout title={title} description={dek} compact={true}>
+  <article class="entry">
+    <div class:list={['hero', 'hero--post', `hero--${heroPalette}`]}></div>
+
+    <header class="entry-header">
+      <p class="dateline">{dateline}</p>
+      <h1 class="title">{title}</h1>
+      {dek && <p class="dek">{dek}</p>}
+    </header>
+
+    <Ornament spacing="tight" />
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    <Ornament spacing="wide" />
+  </article>
+
+  <PrevNext prev={prev} next={next} />
+</BaseLayout>
+
+<style>
+  .entry {
+    max-width: var(--measure-wide);
+    margin-inline: auto;
+  }
+
+  .hero--post {
+    aspect-ratio: 16 / 7;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .entry-header {
+    text-align: center;
+    padding: 2.25rem var(--gutter-wide) 0.5rem;
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+
+  .dateline {
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--c-ink);
+    letter-spacing: 0.1em;
+    margin: 0 0 0.85rem;
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 500;
+    color: var(--c-espresso);
+    line-height: 1.15;
+    margin: 0 0 0.85rem;
+    letter-spacing: -0.01em;
+  }
+
+  .dek {
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--c-warm-brown);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .prose {
+    max-width: var(--measure);
+    margin-inline: auto;
+    padding: 0 var(--gutter-wide);
+  }
+
+  @media (max-width: 640px) {
+    .title { font-size: 1.7rem; }
+    .dek   { font-size: 0.95rem; }
+  }
+</style>
