@@ -5,6 +5,7 @@ publishDate: 2026-03-06
 location: Tampa, Fl.
 mode: writing
 heroPalette: ocean
+heroImage: /images/Tampa May 10, 2026, 12_21_45 PM.png
 heroAlt: “Sunrise is the golden sentence that proves the night was never the end.”
 ---
 
