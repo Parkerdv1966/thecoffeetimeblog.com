@@ -12,7 +12,8 @@
     "strictNullChecks": true,
     "types": [
         "./worker-configuration.d.ts",
-        "node"
+        "node",
+        "astro/client"
     ]
   }
 }
