@@ -10,14 +10,14 @@
 
 backend:
   name: github
-  repo: YOUR-GITHUB-USERNAME/YOUR-REPO-NAME
+  repo: Parkerdv1966/thecoffeetimeblog.com
   branch: main
   # Default: Sveltia's hosted auth at auth.sveltia.app
   # Replace with your own Worker URL if you self-host the OAuth proxy.
   # base_url: https://your-oauth-proxy.workers.dev
 
-site_url: https://thecoffeetimeblog.com
-display_url: https://thecoffeetimeblog.com
+site_url: https://www.thecoffeetimeblog.com
+display_url: https://www.thecoffeetimeblog.com
 logo_url: /favicon.svg
 
 # Where Sveltia uploads images. They get committed to public/images/

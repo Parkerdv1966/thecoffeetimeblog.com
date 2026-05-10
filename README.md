@@ -103,7 +103,13 @@ Edit `public/admin/config.yml` and replace this line:
 repo: YOUR-GITHUB-USERNAME/YOUR-REPO-NAME
 ```
 
-With your actual GitHub username and repo name. Commit and push:
+With your actual GitHub username and repo name, for example:
+
+```yaml
+repo: Parkerdv1966/thecoffeetimeblog.com
+```
+
+Then commit and push:
 
 ```bash
 git add public/admin/config.yml
