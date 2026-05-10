@@ -1,0 +1,34 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <p class="end">— end of page —</p>
+  <p class="meta">
+    thecoffeetimeblog · written from somewhere with good coffee · ©{year}
+  </p>
+</footer>
+
+<style>
+  .site-footer {
+    text-align: center;
+    padding: 2.5rem var(--gutter-wide) 2rem;
+    border-top: 1px solid var(--border-soft);
+    margin-top: 3rem;
+  }
+
+  .end {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--c-warm-brown);
+    margin: 0 0 0.5rem;
+  }
+
+  .meta {
+    font-style: italic;
+    font-size: 0.75rem;
+    color: var(--c-warm-brown);
+    margin: 0;
+  }
+</style>
