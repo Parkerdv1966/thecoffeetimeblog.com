@@ -1,4 +1,5 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'zod';
 import { glob } from 'astro/loaders';
 
 const entries = defineCollection({
@@ -12,6 +13,7 @@ const entries = defineCollection({
     heroPalette: z
       .enum(['terracotta', 'sage', 'ocean', 'gold', 'espresso'])
       .default('terracotta'),
+    heroImage: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });

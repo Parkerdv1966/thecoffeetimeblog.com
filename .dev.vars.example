@@ -1,0 +1,24 @@
+# Copy this file to .dev.vars for local development (wrangler reads it automatically).
+# Never commit .dev.vars — it contains secrets.
+#
+# These same variable names must be set in:
+#   Cloudflare Pages dashboard → your project → Settings → Environment variables
+#   (add them as "Secret" type so they are encrypted)
+
+# SHA-256 hex hash of your chosen admin password.
+# Generate it by running this in a browser console or Node:
+#   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('YourPassword'));
+#   console.log([...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join(''));
+ADMIN_PASSWORD_HASH=paste_your_sha256_hex_here
+
+# Random 32-byte secret used to sign session cookies.
+# Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+SESSION_SECRET=paste_a_random_64_char_hex_here
+
+# GitHub Personal Access Token with "Contents: Read and write" permission
+# (classic token: repo scope, or fine-grained: repository contents read+write)
+# Create at: https://github.com/settings/tokens
+GITHUB_TOKEN=ghp_your_token_here
+
+# The GitHub repo that holds your site (owner/repo format)
+GITHUB_REPO=Parkerdv1966/thecoffeetimeblog.com

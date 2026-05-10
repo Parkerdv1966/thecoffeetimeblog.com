@@ -1,0 +1,546 @@
+---
+export const prerender = false;
+
+import { verifyToken, parseSessionCookie } from '../../lib/auth';
+
+const runtimeEnv = (Astro.locals as any).runtime?.env;
+const secret: string = runtimeEnv?.SESSION_SECRET ?? import.meta.env.SESSION_SECRET ?? '';
+
+const token = parseSessionCookie(Astro.request.headers.get('cookie'));
+if (!token || !secret || !(await verifyToken(token, secret))) {
+  return Astro.redirect('/admin/login');
+}
+
+const success = Astro.url.searchParams.get('success');
+const error = Astro.url.searchParams.get('error');
+
+const today = new Date().toISOString().slice(0, 10);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>admin — the coffee time</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+        <span class="header-brand">the coffee time <span class="header-sep">—</span> admin</span>
+        <a href="/api/admin/logout" class="signout">sign out</a>
+      </div>
+    </header>
+
+    <main>
+      {
+        success && (
+          <div class="banner banner--ok">
+            Entry committed to GitHub — Cloudflare is rebuilding. It'll be live in ~2 minutes.
+          </div>
+        )
+      }
+      {
+        error === 'missing' && (
+          <div class="banner banner--err">Please fill in all required fields (title, date, location).</div>
+        )
+      }
+      {
+        error === 'github' && (
+          <div class="banner banner--err">
+            GitHub error — check that your token has repo write access and the slug doesn't already exist.
+          </div>
+        )
+      }
+
+      <section class="panel">
+        <h2>new entry</h2>
+
+        <form id="post-form" method="POST" action="/api/admin/post">
+          <!-- Title -->
+          <div class="field">
+            <label for="title">title <span class="req">*</span></label>
+            <input type="text" id="title" name="title" required placeholder="In the colour of a flat white" />
+          </div>
+
+          <!-- Dek -->
+          <div class="field">
+            <label for="dek">subtitle / dek</label>
+            <input type="text" id="dek" name="dek" placeholder="An evening at A Brasileira do Chiado…" />
+          </div>
+
+          <!-- Date + Location -->
+          <div class="row">
+            <div class="field">
+              <label for="publishDate">date <span class="req">*</span></label>
+              <input type="date" id="publishDate" name="publishDate" required value={today} />
+            </div>
+            <div class="field">
+              <label for="location">location <span class="req">*</span></label>
+              <input type="text" id="location" name="location" required placeholder="Lisbon" />
+            </div>
+          </div>
+
+          <!-- Mode + Palette -->
+          <div class="row">
+            <div class="field">
+              <label for="mode">mode</label>
+              <select id="mode" name="mode">
+                <option value="essay">essay</option>
+                <option value="writing">writing</option>
+                <option value="travels">travels</option>
+                <option value="café">café</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="heroPalette">hero colour</label>
+              <select id="heroPalette" name="heroPalette">
+                <option value="terracotta">terracotta</option>
+                <option value="sage">sage</option>
+                <option value="ocean">ocean</option>
+                <option value="gold">gold</option>
+                <option value="espresso">espresso</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Image upload -->
+          <div class="field">
+            <label>hero image <span class="meta-note">(optional — overrides colour block)</span></label>
+            <div class="upload-zone" id="upload-zone">
+              <input type="file" id="img-input" accept="image/jpeg,image/png,image/webp" />
+              <p class="upload-hint" id="upload-hint">click to choose an image</p>
+            </div>
+            <p class="upload-status" id="upload-status"></p>
+            <div class="preview-wrap" id="preview-wrap" style="display:none">
+              <img id="preview-img" src="" alt="preview" />
+              <button type="button" id="remove-img" class="btn-ghost">remove image</button>
+            </div>
+            <input type="hidden" id="heroImage" name="heroImage" />
+          </div>
+
+          <!-- Body -->
+          <div class="field">
+            <label for="content">content <span class="req">*</span></label>
+            <textarea
+              id="content"
+              name="content"
+              rows="18"
+              required
+              placeholder="The waiter brings it without a saucer, just the cup…"
+            ></textarea>
+            <p class="hint">Markdown: **bold**, *italic*, &gt; blockquote, --- for · · · divider</p>
+          </div>
+
+          <!-- Draft -->
+          <div class="field field--inline">
+            <label class="check-label">
+              <input type="checkbox" name="draft" value="true" />
+              save as draft (hidden from public)
+            </label>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn-primary" id="submit-btn">publish entry →</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
+
+<script>
+  const imgInput = document.getElementById('img-input') as HTMLInputElement;
+  const heroImageInput = document.getElementById('heroImage') as HTMLInputElement;
+  const uploadStatus = document.getElementById('upload-status') as HTMLParagraphElement;
+  const uploadHint = document.getElementById('upload-hint') as HTMLParagraphElement;
+  const previewWrap = document.getElementById('preview-wrap') as HTMLDivElement;
+  const previewImg = document.getElementById('preview-img') as HTMLImageElement;
+  const removeBtn = document.getElementById('remove-img') as HTMLButtonElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+
+  imgInput?.addEventListener('change', async () => {
+    const file = imgInput.files?.[0];
+    if (!file) return;
+
+    uploadStatus.textContent = 'uploading…';
+    uploadStatus.className = 'upload-status';
+
+    const fd = new FormData();
+    fd.append('image', file);
+
+    try {
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      if (!res.ok) throw new Error((await res.json()).error ?? 'Upload failed');
+      const { url } = await res.json();
+
+      heroImageInput.value = url;
+      previewImg.src = url;
+      previewWrap.style.display = 'block';
+      uploadHint.textContent = file.name;
+      uploadStatus.textContent = `✓ uploaded`;
+      uploadStatus.className = 'upload-status upload-status--ok';
+    } catch (e: any) {
+      uploadStatus.textContent = `upload failed: ${e.message}`;
+      uploadStatus.className = 'upload-status upload-status--err';
+    }
+  });
+
+  removeBtn?.addEventListener('click', () => {
+    heroImageInput.value = '';
+    imgInput.value = '';
+    previewWrap.style.display = 'none';
+    uploadHint.textContent = 'click to choose an image';
+    uploadStatus.textContent = '';
+    uploadStatus.className = 'upload-status';
+  });
+
+  document.getElementById('post-form')?.addEventListener('submit', () => {
+    submitBtn.textContent = 'publishing…';
+    submitBtn.disabled = true;
+  });
+</script>
+
+<style>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Fraunces', Georgia, serif;
+    background: #f1e6cc;
+    color: #4a2818;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  header {
+    border-bottom: 1px solid rgba(74, 40, 24, 0.2);
+    background: #faefd9;
+    padding: 0.9rem 2rem;
+  }
+
+  .header-inner {
+    max-width: 54rem;
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-brand {
+    font-style: italic;
+    font-size: 0.9rem;
+    color: #8b6038;
+    letter-spacing: 0.04em;
+  }
+
+  .header-sep {
+    color: rgba(139, 96, 56, 0.5);
+  }
+
+  .signout {
+    font-size: 0.78rem;
+    font-style: italic;
+    color: #8b6038;
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .signout:hover {
+    color: #8b3d2a;
+    border-bottom-color: #8b3d2a;
+  }
+
+  /* ── Main ── */
+  main {
+    flex: 1;
+    max-width: 54rem;
+    margin-inline: auto;
+    width: 100%;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  /* ── Banners ── */
+  .banner {
+    border-radius: 2px;
+    padding: 0.85rem 1.1rem;
+    font-style: italic;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+
+  .banner--ok {
+    background: #d4edda;
+    color: #1a4731;
+    border: 1px solid #a8d5b5;
+  }
+
+  .banner--err {
+    background: #fde8e2;
+    color: #7a2216;
+    border: 1px solid #f5b8a8;
+  }
+
+  /* ── Panel ── */
+  .panel {
+    background: #faefd9;
+    border: 1px solid rgba(74, 40, 24, 0.18);
+    border-radius: 2px;
+    padding: 2rem 2.25rem 2.5rem;
+  }
+
+  .panel h2 {
+    font-size: 1rem;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: 0.1em;
+    color: #8b6038;
+    text-transform: lowercase;
+    margin-bottom: 1.75rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid rgba(74, 40, 24, 0.15);
+  }
+
+  /* ── Form ── */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .field--inline {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  label {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: #8b6038;
+    text-transform: lowercase;
+  }
+
+  .req {
+    color: #c46b47;
+  }
+
+  .meta-note {
+    color: rgba(139, 96, 56, 0.65);
+    font-style: italic;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+  }
+
+  input[type='text'],
+  input[type='date'],
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: #4a2818;
+    background: #f1e6cc;
+    border: 1px solid rgba(74, 40, 24, 0.25);
+    border-radius: 2px;
+    padding: 0.55rem 0.75rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  input[type='text']:focus,
+  input[type='date']:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #1f2b45;
+  }
+
+  textarea {
+    resize: vertical;
+    line-height: 1.7;
+  }
+
+  .hint {
+    font-style: italic;
+    font-size: 0.72rem;
+    color: #8b6038;
+    margin-top: 0.3rem;
+  }
+
+  /* ── Upload zone ── */
+  .upload-zone {
+    position: relative;
+    border: 1px dashed rgba(74, 40, 24, 0.35);
+    border-radius: 2px;
+    background: #f1e6cc;
+    padding: 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .upload-zone:hover {
+    border-color: #4a2818;
+  }
+
+  .upload-zone input[type='file'] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+
+  .upload-hint {
+    font-style: italic;
+    font-size: 0.82rem;
+    color: #8b6038;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .upload-status {
+    font-size: 0.78rem;
+    font-style: italic;
+    color: #8b6038;
+    min-height: 1.2em;
+  }
+
+  .upload-status--ok {
+    color: #1a6b3c;
+  }
+
+  .upload-status--err {
+    color: #8b3d2a;
+  }
+
+  .preview-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .preview-wrap img {
+    max-height: 80px;
+    max-width: 140px;
+    border-radius: 2px;
+    object-fit: cover;
+    border: 1px solid rgba(74, 40, 24, 0.2);
+  }
+
+  /* ── Checkbox ── */
+  .check-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #4a2818;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  input[type='checkbox'] {
+    accent-color: #4a2818;
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+  }
+
+  /* ── Buttons ── */
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+  }
+
+  .btn-primary {
+    background: #4a2818;
+    color: #f1e6cc;
+    border: none;
+    border-radius: 2px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-style: italic;
+    letter-spacing: 0.04em;
+    padding: 0.7rem 1.75rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #8b3d2a;
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .btn-ghost {
+    background: none;
+    border: 1px solid rgba(74, 40, 24, 0.3);
+    border-radius: 2px;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: #8b6038;
+    padding: 0.3rem 0.65rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-ghost:hover {
+    color: #8b3d2a;
+    border-color: #8b3d2a;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    main {
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    .panel {
+      padding: 1.5rem 1.25rem 2rem;
+    }
+
+    .row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

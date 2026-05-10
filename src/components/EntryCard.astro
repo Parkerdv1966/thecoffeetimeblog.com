@@ -7,13 +7,16 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title, mode, publishDate, location, dek, heroPalette } = entry.data;
+const { title, mode, publishDate, location, dek, heroPalette, heroImage } = entry.data;
 const day = formatDay(publishDate);
 ---
 
 <article class="entry-card">
   <a href={`/entries/${entry.id}`} class="card-link">
-    <div class:list={['hero', `hero--${heroPalette}`]}></div>
+    {heroImage
+      ? <div class="hero"><img src={heroImage} alt={title} /></div>
+      : <div class:list={['hero', `hero--${heroPalette}`]}></div>
+    }
     <p class="meta">
       <span class="day">{day}</span>
       <span class="sep"> — </span>

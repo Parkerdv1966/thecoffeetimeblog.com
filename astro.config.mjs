@@ -1,4 +1,5 @@
 // @ts-check
+import cloudflare from '@astrojs/cloudflare';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig, fontProviders } from 'astro/config';
@@ -7,7 +8,8 @@ import { defineConfig, fontProviders } from 'astro/config';
 export default defineConfig({
   site: 'https://thecoffeetimeblog-com.pages.dev',
   integrations: [mdx(), sitemap()],
-  output: 'static',
+  output: 'hybrid',
+  adapter: cloudflare(),
 
   fonts: [
       {
