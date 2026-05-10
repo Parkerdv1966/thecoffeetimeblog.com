@@ -1,28 +1,21 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import WorkCard from '../components/WorkCard.astro';
 import Ornament from '../components/Ornament.astro';
+import { getCollection } from 'astro:content';
 
-// In-progress works. Add to this list as you start new pieces.
-const works = [
-  {
-    title: 'The Long Hours',
-    kind: 'short story',
-    status: 'in progress',
-    note: "A translator who can't sleep. Started in a Vienna café, still being figured out.",
-  },
-  {
-    title: 'untitled novel',
-    kind: 'novel',
-    status: 'first draft',
-    note: 'Set across three cities and one bad year. Slow.',
-  },
-  {
-    title: 'Coffee Notebook',
-    kind: 'essay collection',
-    status: 'gathering',
-    note: 'A book made out of these journal entries — eventually. The ones that hold up.',
-  },
-];
+const allWorks = (await getCollection('works', ({ data }) => !data.draft)).sort(
+  (a, b) => (a.data.order ?? 99) - (b.data.order ?? 99),
+);
+
+const inProgress = allWorks.filter((w) => w.data.status !== 'finished');
+const finished = allWorks
+  .filter((w) => w.data.status === 'finished')
+  .sort((a, b) => {
+    const aDate = a.data.finishedDate?.valueOf() ?? 0;
+    const bDate = b.data.finishedDate?.valueOf() ?? 0;
+    return bDate - aDate;
+  });
 ---
 
 <BaseLayout title="the books" compact={true}>
@@ -35,23 +28,41 @@ const works = [
       </p>
     </header>
 
-    <Ornament spacing="tight" />
+    {
+      inProgress.length > 0 && (
+        <section class="section" aria-labelledby="inprogress-heading">
+          <h2 id="inprogress-heading" class="section-label">in progress</h2>
+          <div class="works">
+            {inProgress.map((work) => (
+              <WorkCard work={work} />
+            ))}
+          </div>
+        </section>
+      )
+    }
 
-    <div class="works">
-      {
-        works.map((work) => (
-          <article class="work">
-            <p class="kind">
-              <span>{work.kind}</span>
-              <span class="dot">·</span>
-              <span class="status">{work.status}</span>
-            </p>
-            <h2 class="work-title">{work.title}</h2>
-            <p class="note">{work.note}</p>
-          </article>
-        ))
-      }
-    </div>
+    <Ornament spacing="wide" />
+
+    {
+      finished.length > 0 && (
+        <section class="section" aria-labelledby="finished-heading">
+          <h2 id="finished-heading" class="section-label">finished works</h2>
+          <div class="works">
+            {finished.map((work) => (
+              <WorkCard work={work} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      allWorks.length === 0 && (
+        <p class="empty">
+          <em>Nothing here yet — first work coming soon.</em>
+        </p>
+      )
+    }
   </article>
 </BaseLayout>
 
@@ -59,10 +70,13 @@ const works = [
   .books {
     max-width: var(--measure);
     margin-inline: auto;
-    padding: 2rem var(--gutter-wide) 1rem;
+    padding: 2rem clamp(1rem, 5vw, 2.5rem) 1rem;
   }
 
-  .books-header { text-align: center; }
+  .books-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
 
   .kicker {
     font-style: italic;
@@ -74,11 +88,12 @@ const works = [
 
   .title {
     font-family: var(--font-display);
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 4vw, 2rem);
     font-weight: 500;
     color: var(--c-espresso);
     line-height: 1.15;
-    margin: 0 0 0.6rem;
+    margin: 0 0 0.75rem;
+    text-wrap: balance;
   }
 
   .subtitle {
@@ -86,45 +101,26 @@ const works = [
     color: var(--c-warm-brown);
     font-size: 0.95rem;
     margin: 0;
+    text-wrap: balance;
   }
 
-  .works {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
+  .section { margin-top: 1rem; }
 
-  .work {
-    border-bottom: 1px solid var(--border-soft);
-    padding-bottom: 2rem;
-  }
-
-  .work:last-child { border-bottom: none; }
-
-  .kind {
-    font-style: italic;
-    color: var(--c-ink);
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
-    margin: 0 0 0.45rem;
-  }
-
-  .dot { color: var(--c-warm-brown); margin: 0 0.4rem; }
-  .status { color: var(--c-warm-brown); }
-
-  .work-title {
+  .section-label {
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 500;
-    font-size: 1.45rem;
-    color: var(--c-espresso);
-    margin: 0 0 0.65rem;
+    font-size: 0.85rem;
+    color: var(--c-ink);
+    letter-spacing: 0.22em;
+    text-align: center;
+    margin: 0 0 1rem;
+    text-transform: lowercase;
   }
 
-  .note {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: var(--c-espresso-soft);
-    margin: 0;
+  .empty {
+    text-align: center;
+    color: var(--c-warm-brown);
+    margin: 3rem 0;
   }
 </style>

@@ -1,0 +1,180 @@
+# ----------------------------------------------------------------------
+# Sveltia CMS configuration for the coffee time blog
+# ----------------------------------------------------------------------
+# Before this works, you must:
+#   1. Replace YOUR-GITHUB-USERNAME and YOUR-REPO-NAME below
+#   2. Create a GitHub OAuth App (see README → Setting up the admin)
+#   3. Either use Sveltia's hosted auth (default) or deploy your own
+#      Cloudflare Worker proxy and point base_url to it.
+# ----------------------------------------------------------------------
+
+backend:
+  name: github
+  repo: YOUR-GITHUB-USERNAME/YOUR-REPO-NAME
+  branch: main
+  # Default: Sveltia's hosted auth at auth.sveltia.app
+  # Replace with your own Worker URL if you self-host the OAuth proxy.
+  # base_url: https://your-oauth-proxy.workers.dev
+
+site_url: https://thecoffeetimeblog.com
+display_url: https://thecoffeetimeblog.com
+logo_url: /favicon.svg
+
+# Where Sveltia uploads images. They get committed to public/images/
+# and served at /images/...
+media_folder: public/images
+public_folder: /images
+
+# Make new files use a clean URL slug.
+slug:
+  encoding: ascii
+  clean_accents: true
+
+collections:
+  # --------------------------------------------------------------------
+  # Journal entries — the daily/essay feed on the homepage
+  # --------------------------------------------------------------------
+  - name: entries
+    label: Journal entries
+    label_singular: Journal entry
+    folder: src/content/entries
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{title}} — {{location}} ({{publishDate | date('YYYY-MM-DD')}})"
+    sortable_fields: [publishDate, title, location]
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Subtitle, name: dek, widget: string, required: false, hint: "One-line summary, italicized in the layout" }
+      - label: Date
+        name: publishDate
+        widget: datetime
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+      - { label: Location, name: location, widget: string, hint: "City name, e.g. Lisbon" }
+      - label: Mode
+        name: mode
+        widget: select
+        options: [writing, travels, café, essay]
+        default: writing
+      - label: Hero palette
+        name: heroPalette
+        widget: select
+        options: [terracotta, sage, ocean, gold, espresso]
+        default: terracotta
+        hint: "Used when no hero image is uploaded"
+      - { label: Hero image, name: heroImage, widget: image, required: false, hint: "Optional — overrides palette block" }
+      - { label: Hero alt text, name: heroAlt, widget: string, required: false }
+      - { label: Draft, name: draft, widget: boolean, default: false }
+      - { label: Body, name: body, widget: markdown }
+
+  # --------------------------------------------------------------------
+  # Trips — destinations shown on the travel page + map
+  # --------------------------------------------------------------------
+  - name: trips
+    label: Trips
+    label_singular: Trip
+    folder: src/content/trips
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{title}} ({{status}})"
+    sortable_fields: [startDate, title, location]
+    fields:
+      - { label: Title, name: title, widget: string, hint: "e.g. Lisbon, October 2026" }
+      - { label: City / location, name: location, widget: string }
+      - { label: Country, name: country, widget: string }
+      - label: Coordinates
+        name: coordinates
+        widget: object
+        summary: "{{lat}}, {{lng}}"
+        fields:
+          - { label: Latitude, name: lat, widget: number, value_type: float, min: -90, max: 90, hint: "e.g. 38.7223 (positive = North)" }
+          - { label: Longitude, name: lng, widget: number, value_type: float, min: -180, max: 180, hint: "e.g. -9.1393 (negative = West)" }
+      - label: Start date
+        name: startDate
+        widget: datetime
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+      - label: End date
+        name: endDate
+        widget: datetime
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        required: false
+      - label: Status
+        name: status
+        widget: select
+        options: [past, upcoming]
+        default: past
+      - label: Cover palette
+        name: coverPalette
+        widget: select
+        options: [terracotta, sage, ocean, gold, espresso]
+        default: terracotta
+      - { label: Cover image, name: coverImage, widget: image, required: false }
+      - label: Photos
+        name: photos
+        widget: list
+        required: false
+        field: { label: Image, name: image, widget: image }
+      - { label: Draft, name: draft, widget: boolean, default: false }
+      - { label: Body, name: body, widget: markdown }
+
+  # --------------------------------------------------------------------
+  # Works — books, stories, essays in progress and finished
+  # --------------------------------------------------------------------
+  - name: works
+    label: Works
+    label_singular: Work
+    folder: src/content/works
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{title}} — {{kind}} ({{status}})"
+    sortable_fields: [order, title, status, finishedDate]
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Kind
+        name: kind
+        widget: select
+        options: ["short story", novella, novel, "essay collection", poem, "poetry collection"]
+      - label: Status
+        name: status
+        widget: select
+        options: [idea, gathering, "first draft", "in progress", editing, finished]
+      - label: Started date
+        name: startedDate
+        widget: datetime
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        required: false
+      - label: Finished date
+        name: finishedDate
+        widget: datetime
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        required: false
+      - { label: Excerpt, name: excerpt, widget: text, required: false, hint: "Short quote pulled from the work" }
+      - { label: Note, name: note, widget: text, hint: "What this is about, where you are with it" }
+      - { label: Cover image, name: coverImage, widget: image, required: false }
+      - label: Cover palette
+        name: coverPalette
+        widget: select
+        options: [terracotta, sage, ocean, gold, espresso]
+        default: espresso
+      - { label: Display order, name: order, widget: number, value_type: int, required: false, hint: "Lower numbers appear first; leave blank to use default ordering" }
+      - { label: Draft, name: draft, widget: boolean, default: false }
+      - label: Body
+        name: body
+        widget: markdown
+        required: false
+        hint: "Optional longer description"

@@ -7,16 +7,24 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title, dek, publishDate, location, heroPalette, heroImage } = entry.data;
+const { title, dek, mode: _mode, publishDate, location, heroPalette, heroImage, heroAlt } = entry.data;
 const day = formatDay(publishDate);
 ---
 
 <article class="featured">
   <p class="date">{day} — {location}</p>
   <a href={`/entries/${entry.id}`} class="hero-link">
-    {heroImage
-      ? <div class="hero hero--featured"><img src={heroImage} alt={title} /></div>
-      : <div class:list={['hero', 'hero--featured', `hero--${heroPalette}`]}></div>
+    {
+      heroImage ? (
+        <img
+          src={heroImage}
+          alt={heroAlt ?? title}
+          class="featured-img"
+          loading="eager"
+        />
+      ) : (
+        <div class:list={['hero', 'hero--featured', `hero--${heroPalette}`]} />
+      )
     }
   </a>
   <a href={`/entries/${entry.id}`} class="title-link">
@@ -30,7 +38,7 @@ const day = formatDay(publishDate);
 
 <style>
   .featured {
-    padding: 2rem var(--gutter-wide) 0.5rem;
+    padding: 2rem clamp(1rem, 5vw, 2.5rem) 0.5rem;
     max-width: var(--measure-wide);
     margin-inline: auto;
   }
@@ -55,23 +63,32 @@ const day = formatDay(publishDate);
     aspect-ratio: 16 / 7;
   }
 
+  .featured-img {
+    aspect-ratio: 16 / 7;
+    width: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 2px;
+  }
+
   .title-link:hover .title { color: var(--c-terracotta-deep); }
 
   .title {
     font-family: var(--font-display);
-    font-size: 2rem;
+    font-size: clamp(1.4rem, 4vw, 2rem);
     font-weight: 500;
     color: var(--c-espresso);
     line-height: 1.18;
     margin: 1.2rem 0 0.6rem;
     letter-spacing: -0.005em;
     transition: color 0.2s ease;
+    text-wrap: balance;
   }
 
   .dek {
     font-style: italic;
     color: var(--c-espresso-soft);
-    font-size: 1.05rem;
+    font-size: clamp(0.95rem, 2.5vw, 1.05rem);
     line-height: 1.55;
     margin: 0 0 1rem;
   }
@@ -89,10 +106,5 @@ const day = formatDay(publishDate);
 
   .read-on a:hover {
     color: var(--c-terracotta-deep);
-  }
-
-  @media (max-width: 640px) {
-    .title { font-size: 1.5rem; }
-    .dek { font-size: 0.95rem; }
   }
 </style>

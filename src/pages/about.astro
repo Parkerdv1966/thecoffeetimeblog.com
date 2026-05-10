@@ -30,34 +30,69 @@ import Ornament from '../components/Ornament.astro';
         small daily one — a place, a cup, what the room felt like.
       </p>
 
-	<p>
-		Mollis nunc sed id semper risus in. Convallis a cras semper auctor neque. Diam sit amet nisl
-		suscipit. Lacus viverra vitae congue eu consequat ac felis donec. Egestas integer eget aliquet
-		nibh praesent tristique magna sit amet. Eget magna fermentum iaculis eu non diam. In vitae
-		turpis massa sed elementum. Tristique et egestas quis ipsum suspendisse ultrices. Eget lorem
-		dolor sed viverra ipsum. Vel turpis nunc eget lorem dolor sed viverra. Posuere ac ut consequat
-		semper viverra nam. Laoreet suspendisse interdum consectetur libero id faucibus. Diam phasellus
-		vestibulum lorem sed risus ultricies tristique. Rhoncus dolor purus non enim praesent elementum
-		facilisis. Ultrices tincidunt arcu non sodales neque. Tempus egestas sed sed risus pretium quam
-		vulputate. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Fringilla
-		urna porttitor rhoncus dolor purus non. Amet dictum sit amet justo donec enim.
-	</p>
+      <p>
+        the longer pieces become <em>essays</em>. the longest ones, eventually,
+        will become books.
+      </p>
 
-	<p>
-		Mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor posuere ac ut consequat semper
-		viverra. Tellus mauris a diam maecenas sed enim ut sem viverra. Venenatis urna cursus eget nunc
-		scelerisque viverra mauris in. Arcu ac tortor dignissim convallis aenean et tortor at. Curabitur
-		gravida arcu ac tortor dignissim convallis aenean et tortor. Egestas tellus rutrum tellus
-		pellentesque eu. Fusce ut placerat orci nulla pellentesque dignissim enim sit amet. Ut enim
-		blandit volutpat maecenas volutpat blandit aliquam etiam. Id donec ultrices tincidunt arcu. Id
-		cursus metus aliquam eleifend mi.
-	</p>
+      <p class="signoff">— Parker</p>
+    </div>
+  </article>
+</BaseLayout>
 
-	<p>
-		Tempus quam pellentesque nec nam aliquam sem. Risus at ultrices mi tempus imperdiet. Id porta
-		nibh venenatis cras sed felis eget velit. Ipsum a arcu cursus vitae. Facilisis magna etiam
-		tempor orci eu lobortis elementum. Tincidunt dui ut ornare lectus sit. Quisque non tellus orci
-		ac. Blandit libero volutpat sed cras. Nec tincidunt praesent semper feugiat nibh sed pulvinar
-		proin gravida. Egestas integer eget aliquet nibh praesent tristique magna.
-	</p>
-</Layout>
+<style>
+  .about {
+    /* Fluid container — scales with viewport, capped at the readable measure */
+    width: min(100% - 2rem, 38rem);
+    margin-inline: auto;
+    padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1rem, 4vw, 2rem) 1rem;
+  }
+
+  .about-header { text-align: center; }
+
+  .kicker {
+    font-style: italic;
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    color: var(--c-ink);
+    margin: 0 0 0.85rem;
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 4.5vw, 2rem);
+    font-weight: 500;
+    color: var(--c-espresso);
+    line-height: 1.15;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .prose {
+    margin-top: 0.5rem;
+  }
+
+  .prose p {
+    /* Fluid type — 1rem on small screens, 1.075rem on large ones */
+    font-size: clamp(1rem, 0.95rem + 0.2vw, 1.1rem);
+    line-height: 1.85;
+    margin: 0 0 1.1em;
+
+    /* Long-word safety — break gracefully on narrow viewports */
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
+  .prose em {
+    color: var(--c-ink);
+    font-style: italic;
+  }
+
+  .signoff {
+    margin-top: 2rem;
+    font-style: italic;
+    color: var(--c-warm-brown);
+  }
+</style>

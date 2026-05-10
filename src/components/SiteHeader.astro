@@ -1,0 +1,126 @@
+---
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+const path = Astro.url.pathname;
+
+function isActive(href: string): boolean {
+  if (href === '/') return path === '/' || path === '';
+  return path.startsWith(href);
+}
+
+const navItems = [
+  { href: '/', label: 'essays' },
+  { href: '/travels', label: 'travels' },
+  { href: '/books', label: 'the books' },
+  { href: '/about', label: 'about' },
+];
+---
+
+<header class:list={['site-header', { compact }]}>
+  <a href="/" class="logo-link">
+    <span class="logo">the coffee time</span>
+  </a>
+  {!compact && <p class="subtitle">— travels &amp; writing —</p>}
+  <nav class="nav" aria-label="Primary">
+    {
+      navItems.map((item, i) => (
+        <>
+          {i > 0 && <span class="dot" aria-hidden="true">·</span>}
+          <a
+            href={item.href}
+            class:list={{ active: isActive(item.href) }}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        </>
+      ))
+    }
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    text-align: center;
+    padding: clamp(2rem, 5vw, 2.5rem) clamp(1rem, 5vw, 2.5rem) 1.25rem;
+    border-bottom: 1px solid var(--border-medium);
+  }
+
+  .site-header.compact {
+    padding: clamp(1rem, 3vw, 1.25rem) clamp(1rem, 5vw, 2.5rem);
+  }
+
+  .logo-link {
+    border: none;
+    color: inherit;
+    display: inline-block;
+  }
+
+  .logo-link:hover { color: inherit; }
+
+  .logo {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--c-espresso);
+    letter-spacing: 0.01em;
+    display: inline-block;
+  }
+
+  .site-header:not(.compact) .logo {
+    font-size: clamp(1.7rem, 5vw, 2.2rem);
+  }
+
+  .site-header.compact .logo {
+    font-size: clamp(1.05rem, 3vw, 1.25rem);
+  }
+
+  .subtitle {
+    font-style: italic;
+    color: var(--c-ink);
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    margin: 0.5rem 0 0;
+  }
+
+  .nav {
+    margin-top: 1.1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    font-style: italic;
+    font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+  }
+
+  .site-header.compact .nav {
+    margin-top: 0.6rem;
+    font-size: clamp(0.8rem, 2vw, 0.88rem);
+  }
+
+  .nav a {
+    color: var(--c-espresso);
+    border-bottom: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .nav a:hover {
+    color: var(--c-terracotta-deep);
+  }
+
+  .nav a.active {
+    color: var(--c-ink);
+    border-bottom-color: var(--c-ink);
+  }
+
+  .dot {
+    color: var(--c-warm-brown);
+    user-select: none;
+  }
+</style>

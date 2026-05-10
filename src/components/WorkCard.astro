@@ -1,0 +1,148 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatLongDate } from '../lib/format';
+
+interface Props {
+  work: CollectionEntry<'works'>;
+}
+
+const { work } = Astro.props;
+const {
+  title,
+  kind,
+  status,
+  startedDate,
+  finishedDate,
+  excerpt,
+  note,
+  coverImage,
+  coverPalette,
+} = work.data;
+
+const isFinished = status === 'finished';
+
+let dates = '';
+if (isFinished && finishedDate) {
+  dates = `Finished ${formatLongDate(finishedDate)}`;
+} else if (startedDate) {
+  dates = `Started ${formatLongDate(startedDate)}`;
+}
+---
+
+<article class:list={['work', { 'work--finished': isFinished }]}>
+  <div class="work-meta">
+    <p class="kind">
+      <span>{kind}</span>
+      <span class="dot">·</span>
+      <span class="status">{status}</span>
+    </p>
+    {dates && <p class="dates">{dates}</p>}
+  </div>
+
+  {
+    coverImage ? (
+      <img src={coverImage} alt={title} class="cover" loading="lazy" />
+    ) : (
+      <div class:list={['cover hero', `hero--${coverPalette}`]} aria-hidden="true" />
+    )
+  }
+
+  <h2 class="title">{title}</h2>
+  <p class="note">{note}</p>
+
+  {
+    excerpt && (
+      <blockquote class="excerpt">
+        <p>"{excerpt}"</p>
+      </blockquote>
+    )
+  }
+</article>
+
+<style>
+  .work {
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .work:last-child { border-bottom: none; }
+
+  .work-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .kind {
+    font-style: italic;
+    color: var(--c-ink);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    margin: 0;
+  }
+
+  .dot { color: var(--c-warm-brown); margin: 0 0.4rem; }
+  .status { color: var(--c-warm-brown); }
+
+  .work--finished .status {
+    color: var(--c-sage);
+    font-weight: 500;
+  }
+
+  .dates {
+    font-style: italic;
+    font-size: 0.78rem;
+    color: var(--c-warm-brown);
+    margin: 0;
+    letter-spacing: 0.04em;
+  }
+
+  .cover {
+    aspect-ratio: 16 / 6;
+    width: 100%;
+    margin: 0.5rem 0 1rem;
+    border-radius: 2px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.6rem;
+    color: var(--c-espresso);
+    margin: 0 0 0.7rem;
+    line-height: 1.25;
+  }
+
+  .note {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--c-espresso-soft);
+    margin: 0 0 1rem;
+  }
+
+  .excerpt {
+    margin: 1rem 0 0;
+    padding: 1rem 1.5rem;
+    border-left: 2px solid var(--c-ink);
+    background: var(--c-cream-soft);
+  }
+
+  .excerpt p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.02rem;
+    color: var(--c-ink);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .title { font-size: 1.3rem; }
+  }
+</style>

@@ -12,13 +12,24 @@ interface Props {
 }
 
 const { entry, prev, next } = Astro.props;
-const { title, dek, publishDate, location, heroPalette } = entry.data;
+const { title, dek, publishDate, location, heroPalette, heroImage, heroAlt } = entry.data;
 const dateline = formatDateline(publishDate, location);
 ---
 
 <BaseLayout title={title} description={dek} compact={true}>
   <article class="entry">
-    <div class:list={['hero', 'hero--post', `hero--${heroPalette}`]}></div>
+    {
+      heroImage ? (
+        <img
+          src={heroImage}
+          alt={heroAlt ?? title}
+          class="entry-hero-img"
+          loading="eager"
+        />
+      ) : (
+        <div class:list={['hero', 'hero--post', `hero--${heroPalette}`]} />
+      )
+    }
 
     <header class="entry-header">
       <p class="dateline">{dateline}</p>
@@ -44,15 +55,19 @@ const dateline = formatDateline(publishDate, location);
     margin-inline: auto;
   }
 
-  .hero--post {
+  .hero--post,
+  .entry-hero-img {
     aspect-ratio: 16 / 7;
+    width: 100%;
     margin: 0;
     border-radius: 0;
+    object-fit: cover;
+    display: block;
   }
 
   .entry-header {
     text-align: center;
-    padding: 2.25rem var(--gutter-wide) 0.5rem;
+    padding: clamp(1.5rem, 5vw, 2.25rem) clamp(1rem, 5vw, 2.5rem) 0.5rem;
     max-width: var(--measure);
     margin-inline: auto;
   }
@@ -67,30 +82,33 @@ const dateline = formatDateline(publishDate, location);
 
   .title {
     font-family: var(--font-display);
-    font-size: 2.4rem;
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
     font-weight: 500;
     color: var(--c-espresso);
     line-height: 1.15;
     margin: 0 0 0.85rem;
     letter-spacing: -0.01em;
+    text-wrap: balance;
   }
 
   .dek {
     font-style: italic;
-    font-size: 1.05rem;
+    font-size: clamp(0.95rem, 2.5vw, 1.05rem);
     color: var(--c-warm-brown);
     line-height: 1.55;
     margin: 0;
+    text-wrap: balance;
   }
 
   .prose {
     max-width: var(--measure);
     margin-inline: auto;
-    padding: 0 var(--gutter-wide);
+    padding: 0 clamp(1rem, 5vw, 2.5rem);
   }
 
-  @media (max-width: 640px) {
-    .title { font-size: 1.7rem; }
-    .dek   { font-size: 0.95rem; }
+  .prose p {
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    overflow-wrap: break-word;
   }
 </style>

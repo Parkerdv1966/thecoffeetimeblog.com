@@ -7,15 +7,24 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title, mode, publishDate, location, dek, heroPalette, heroImage } = entry.data;
+const { title, mode, publishDate, location, dek, heroPalette, heroImage, heroAlt } =
+  entry.data;
 const day = formatDay(publishDate);
 ---
 
 <article class="entry-card">
   <a href={`/entries/${entry.id}`} class="card-link">
-    {heroImage
-      ? <div class="hero"><img src={heroImage} alt={title} /></div>
-      : <div class:list={['hero', `hero--${heroPalette}`]}></div>
+    {
+      heroImage ? (
+        <img
+          src={heroImage}
+          alt={heroAlt ?? title}
+          class="card-img"
+          loading="lazy"
+        />
+      ) : (
+        <div class:list={['hero', `hero--${heroPalette}`]} />
+      )
     }
     <p class="meta">
       <span class="day">{day}</span>
@@ -43,13 +52,17 @@ const day = formatDay(publishDate);
     color: var(--c-terracotta-deep);
   }
 
-  .hero {
+  .hero, .card-img {
     aspect-ratio: 16 / 10;
     margin-bottom: 0.85rem;
     transition: transform 0.4s ease;
+    width: 100%;
+    object-fit: cover;
+    display: block;
   }
 
-  .card-link:hover .hero {
+  .card-link:hover .hero,
+  .card-link:hover .card-img {
     transform: scale(1.005);
   }
 
@@ -65,12 +78,13 @@ const day = formatDay(publishDate);
 
   .title {
     font-family: var(--font-display);
-    font-size: 1.3rem;
+    font-size: clamp(1.15rem, 3vw, 1.3rem);
     font-weight: 500;
     color: var(--c-espresso);
     line-height: 1.25;
     margin: 0 0 0.5rem;
     transition: color 0.2s ease;
+    text-wrap: balance;
   }
 
   .dek {
