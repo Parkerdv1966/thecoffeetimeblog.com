@@ -1,0 +1,223 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Ornament from '../../components/Ornament.astro';
+import EntryCard from '../../components/EntryCard.astro';
+import { getCollection, render } from 'astro:content';
+import { formatLongDate } from '../../lib/format';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const allTrips = await getCollection('trips', ({ data }) => !data.draft);
+  return allTrips.map((trip) => ({
+    params: { slug: trip.id },
+    props: { trip },
+  }));
+};
+
+const { trip } = Astro.props;
+const { Content } = await render(trip);
+
+const {
+  title,
+  location,
+  country,
+  startDate,
+  endDate,
+  status,
+  coverImage,
+  coverPalette,
+  coverPosition,
+  photos,
+} = trip.data;
+
+const dateRange = endDate
+  ? `${formatLongDate(startDate)} — ${formatLongDate(endDate)}`
+  : formatLongDate(startDate);
+
+// Find related entries by matching location (case-insensitive)
+const allEntries = await getCollection('entries', ({ data }) => !data.draft);
+const relatedEntries = allEntries
+  .filter(
+    (e) =>
+      e.data.location.trim().toLowerCase() ===
+      location.trim().toLowerCase(),
+  )
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+---
+
+<BaseLayout title={`${location}, ${country}`} description={title} compact={true}>
+  <article class="trip-page">
+    {
+      coverImage ? (
+        <img
+          src={coverImage}
+          alt={`${location}, ${country}`}
+          class="trip-hero-img"
+          style={`object-position: ${coverPosition};`}
+          loading="eager"
+        />
+      ) : (
+        <div class:list={['hero', 'trip-hero', `hero--${coverPalette}`]} aria-hidden="true" />
+      )
+    }
+
+    <header class="trip-header">
+      <p class="meta">
+        <span class="status" data-status={status}>
+          {status === 'past' ? 'visited' : 'planned'}
+        </span>
+        <span class="sep">·</span>
+        <span>{dateRange}</span>
+      </p>
+      <h1 class="title">{title}</h1>
+      <p class="location"><em>{location}, {country}</em></p>
+    </header>
+
+    <Ornament spacing="tight" />
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {
+      photos && photos.length > 0 && (
+        <div class={`photos photos--${Math.min(photos.length, 3)}`}>
+          {photos.map((src, i) => (
+            <img src={src} alt={`${location} — ${i + 1}`} loading="lazy" />
+          ))}
+        </div>
+      )
+    }
+
+    {
+      relatedEntries.length > 0 && (
+        <>
+          <Ornament spacing="wide" />
+          <section class="related" aria-labelledby="related-heading">
+            <h2 id="related-heading" class="section-label">
+              journal entries from {location}
+            </h2>
+            <div class="related-grid">
+              {relatedEntries.map((entry) => (
+                <EntryCard entry={entry} />
+              ))}
+            </div>
+          </section>
+        </>
+      )
+    }
+
+    <nav class="back-nav">
+      <a href="/travels">← all travels</a>
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  .trip-page {
+    max-width: var(--measure-wide);
+    margin-inline: auto;
+  }
+
+  /* Wide hero, less aggressive crop than the original 16/7 */
+  .trip-hero,
+  .trip-hero-img {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    object-fit: cover;
+    display: block;
+  }
+
+  .trip-header {
+    text-align: center;
+    padding: clamp(1.5rem, 5vw, 2.25rem) clamp(1rem, 5vw, 2.5rem) 0.5rem;
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+
+  .meta {
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--c-ink);
+    letter-spacing: 0.08em;
+    margin: 0 0 0.85rem;
+  }
+
+  .status[data-status="past"] { color: var(--c-terracotta-deep); font-weight: 500; }
+  .status[data-status="upcoming"] { color: var(--c-ink); font-weight: 500; }
+  .sep { color: var(--c-warm-brown); margin: 0 0.4rem; }
+
+  .title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: 500;
+    color: var(--c-espresso);
+    line-height: 1.15;
+    margin: 0 0 0.6rem;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .location {
+    font-style: italic;
+    color: var(--c-warm-brown);
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  .prose {
+    max-width: var(--measure);
+    margin-inline: auto;
+    padding: 0 clamp(1rem, 5vw, 2.5rem);
+  }
+
+  .photos {
+    max-width: var(--measure-wide);
+    margin-inline: auto;
+    padding: 0 clamp(1rem, 5vw, 2.5rem);
+  }
+
+  .section-label {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--c-ink);
+    letter-spacing: 0.18em;
+    text-align: center;
+    margin: 0 0 1.25rem;
+    text-transform: lowercase;
+  }
+
+  .related {
+    max-width: var(--measure-wide);
+    margin-inline: auto;
+    padding: 0 clamp(1rem, 5vw, 2.5rem);
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+    gap: 2rem 1.75rem;
+  }
+
+  .back-nav {
+    text-align: center;
+    padding: 2rem clamp(1rem, 5vw, 2.5rem) 2rem;
+    border-top: 1px solid var(--border-soft);
+    margin-top: 2.5rem;
+  }
+
+  .back-nav a {
+    font-style: italic;
+    color: var(--c-ink);
+    border-bottom: none;
+    font-size: 0.95rem;
+  }
+
+  .back-nav a:hover {
+    color: var(--c-terracotta-deep);
+  }
+</style>

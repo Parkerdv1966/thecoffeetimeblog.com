@@ -1,11 +1,10 @@
 ---
-title: In the colour of a flat white
-dek: An evening at A Brasileira do Chiado, and what coffee does to a city's light.
-publishDate: 2025-04-01
-location: Lisbon
-mode: essay
-heroPalette: terracotta
-heroAlt: ''
+title: "In the colour of a flat white"
+dek: "An evening at A Brasileira do Chiado, and what coffee does to a city's light."
+publishDate: 2026-04-14
+location: "Lisbon"
+mode: "essay"
+heroPalette: "terracotta"
 ---
 
 The waiter brings it without a saucer, just the cup, and outside the Tagus is doing that pale gold thing only October light knows how to do. I've been writing all afternoon — a chapter I'm not happy with, but the kind you have to write before you can write the one you actually wanted.

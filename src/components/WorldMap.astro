@@ -10,136 +10,216 @@ const { trips } = Astro.props;
 const VIEW_W = 1000;
 const VIEW_H = 500;
 
-// Equirectangular projection: lat/lng → x/y in viewBox.
+// Hex fills matching the colored hero blocks — used as fallback preview
+// when a trip has no coverImage.
+const paletteFill: Record<string, string> = {
+  terracotta: '#C46B47',
+  sage:       '#6B7F5C',
+  ocean:      '#4A6478',
+  gold:       '#C9A661',
+  espresso:   '#5B3A22',
+};
+
+// Equirectangular projection.
 function project(lat: number, lng: number) {
   const x = ((lng + 180) / 360) * VIEW_W;
   const y = ((90 - lat) / 180) * VIEW_H;
   return { x, y };
 }
 
+// Preview card dimensions
+const PW = 130;
+const PH = 90;
+
 const markers = trips.map((trip) => {
   const { x, y } = project(trip.data.coordinates.lat, trip.data.coordinates.lng);
+
+  // Decide whether the preview floats above or below the marker.
+  const above = y > 130;
+  let px = x - PW / 2;
+  let py = above ? y - PH - 18 : y + 18;
+
+  // Clamp horizontally so the preview doesn't escape the viewBox.
+  if (px < 4) px = 4;
+  if (px + PW > VIEW_W - 4) px = VIEW_W - PW - 4;
+
   return {
     id: trip.id,
+    href: `/travels/${trip.id}`,
     x,
     y,
-    label: trip.data.location,
+    px,
+    py,
     status: trip.data.status,
-    href: `#trip-${trip.id}`,
+    label: trip.data.location,
+    country: trip.data.country,
+    coverImage: trip.data.coverImage,
+    palette: trip.data.coverPalette,
+    above,
   };
 });
 ---
 
-<div class="map-frame" role="img" aria-label="World map showing trip destinations">
-  <svg
-    viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-    xmlns="http://www.w3.org/2000/svg"
-    class="map-svg"
-    preserveAspectRatio="xMidYMid meet"
-  >
-    <!-- Subtle latitude/longitude grid -->
-    <g class="graticule" aria-hidden="true">
-      <line x1="0" y1="125" x2="1000" y2="125" />
-      <line x1="0" y1="250" x2="1000" y2="250" />
-      <line x1="0" y1="375" x2="1000" y2="375" />
-      <line x1="250" y1="0" x2="250" y2="500" />
-      <line x1="500" y1="0" x2="500" y2="500" />
-      <line x1="750" y1="0" x2="750" y2="500" />
-    </g>
+<figure class="map-figure">
+  <figcaption class="map-caption">
+    <span class="caption-text">a map of where i've been &amp; where i'm going</span>
+  </figcaption>
 
-    <!-- Continents (stylized hand-drawn approximations) -->
-    <g class="continents" aria-hidden="true">
-      <!-- North America -->
-      <path d="M 80 70 Q 130 45 220 50 L 320 55 Q 365 65 380 90 Q 365 110 340 125 Q 325 155 305 175 Q 285 200 265 220 L 240 220 Q 220 200 200 185 Q 165 170 135 145 Q 100 120 85 95 Q 75 80 80 70 Z" />
+  <div class="map-frame">
+    <svg
+      viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+      xmlns="http://www.w3.org/2000/svg"
+      class="map-svg"
+      preserveAspectRatio="xMidYMid meet"
+      role="img"
+      aria-label="World map showing trip destinations"
+    >
+      <!-- Ocean -->
+      <rect width="1000" height="500" fill="#D9C9A3" />
 
-      <!-- South America -->
-      <path d="M 285 230 Q 320 225 350 240 Q 365 270 360 320 Q 350 365 330 400 L 305 430 Q 290 440 280 425 Q 268 395 268 360 L 270 305 Q 273 265 285 230 Z" />
+      <!-- Subtle latitude/longitude grid -->
+      <g class="graticule" aria-hidden="true">
+        <line x1="0" y1="125" x2="1000" y2="125" />
+        <line x1="0" y1="250" x2="1000" y2="250" />
+        <line x1="0" y1="375" x2="1000" y2="375" />
+        <line x1="250" y1="0" x2="250" y2="500" />
+        <line x1="500" y1="0" x2="500" y2="500" />
+        <line x1="750" y1="0" x2="750" y2="500" />
+      </g>
 
-      <!-- Europe -->
-      <path d="M 470 80 Q 510 70 555 75 Q 595 80 605 100 Q 600 125 575 140 Q 540 150 510 145 Q 480 140 472 120 Q 465 95 470 80 Z" />
+      <!-- Equator (slightly stronger) -->
+      <line x1="0" y1="250" x2="1000" y2="250" stroke="#8B6038" stroke-width="0.6" stroke-dasharray="6 6" opacity="0.5" />
 
-      <!-- Africa -->
-      <path d="M 490 150 Q 535 145 580 155 L 615 175 Q 630 215 622 260 Q 612 305 595 345 Q 575 375 545 380 Q 515 375 500 350 Q 488 315 484 280 Q 480 235 482 195 Q 484 165 490 150 Z" />
+      <!-- Continents -->
+      <g class="continents" aria-hidden="true">
+        <path d="M 80 70 Q 130 45 220 50 L 320 55 Q 365 65 380 90 Q 365 110 340 125 Q 325 155 305 175 Q 285 200 265 220 L 240 220 Q 220 200 200 185 Q 165 170 135 145 Q 100 120 85 95 Q 75 80 80 70 Z" />
+        <path d="M 285 230 Q 320 225 350 240 Q 365 270 360 320 Q 350 365 330 400 L 305 430 Q 290 440 280 425 Q 268 395 268 360 L 270 305 Q 273 265 285 230 Z" />
+        <path d="M 470 80 Q 510 70 555 75 Q 595 80 605 100 Q 600 125 575 140 Q 540 150 510 145 Q 480 140 472 120 Q 465 95 470 80 Z" />
+        <path d="M 490 150 Q 535 145 580 155 L 615 175 Q 630 215 622 260 Q 612 305 595 345 Q 575 375 545 380 Q 515 375 500 350 Q 488 315 484 280 Q 480 235 482 195 Q 484 165 490 150 Z" />
+        <path d="M 600 65 Q 690 50 780 55 Q 860 60 905 80 Q 935 105 935 140 Q 920 170 880 180 L 830 185 Q 800 200 775 200 Q 745 215 735 245 L 720 260 Q 695 260 680 245 Q 660 225 640 215 Q 615 205 605 180 Q 600 145 600 110 Q 600 85 600 65 Z" />
+        <path d="M 685 200 Q 705 200 715 215 Q 720 240 712 260 Q 700 275 690 270 Q 678 250 680 230 Q 682 215 685 200 Z" />
+        <path d="M 780 245 Q 815 240 840 250 Q 855 260 845 270 Q 815 280 790 275 Q 775 268 780 245 Z" />
+        <path d="M 815 320 Q 855 315 895 325 Q 910 340 895 360 Q 870 370 835 370 Q 810 365 805 350 Q 808 330 815 320 Z" />
+        <path d="M 880 145 Q 890 140 895 150 Q 893 165 885 165 Q 878 158 880 145 Z" />
+        <path d="M 870 170 Q 878 168 882 178 Q 880 186 873 186 Q 868 178 870 170 Z" />
+        <path d="M 463 105 Q 470 100 478 105 Q 478 120 470 122 Q 463 118 463 105 Z" />
+        <path d="M 622 290 Q 628 290 632 300 Q 632 320 626 322 Q 622 315 622 290 Z" />
+      </g>
 
-      <!-- Asia (large mass) -->
-      <path d="M 600 65 Q 690 50 780 55 Q 860 60 905 80 Q 935 105 935 140 Q 920 170 880 180 L 830 185 Q 800 200 775 200 Q 745 215 735 245 L 720 260 Q 695 260 680 245 Q 660 225 640 215 Q 615 205 605 180 Q 600 145 600 110 Q 600 85 600 65 Z" />
+      <!-- Markers + previews -->
+      <g class="markers">
+        {
+          markers.map((m) => (
+            <a href={m.href} class={`marker marker--${m.status}`} aria-label={`${m.label}, ${m.country} (${m.status === 'past' ? 'visited' : 'planned'})`}>
+              {/* Preview card — invisible until the marker is hovered/focused */}
+              <g class="preview" pointer-events="none">
+                <rect x={m.px - 2} y={m.py - 2} width={PW + 4} height={PH + 4} class="preview-shadow" />
+                <rect x={m.px} y={m.py} width={PW} height={PH} class="preview-bg" />
+                {m.coverImage ? (
+                  <image
+                    href={m.coverImage}
+                    x={m.px + 4}
+                    y={m.py + 4}
+                    width={PW - 8}
+                    height={PH - 26}
+                    preserveAspectRatio="xMidYMid slice"
+                  />
+                ) : (
+                  <rect x={m.px + 4} y={m.py + 4} width={PW - 8} height={PH - 26} fill={paletteFill[m.palette]} />
+                )}
+                <text
+                  x={m.px + PW / 2}
+                  y={m.py + PH - 8}
+                  text-anchor="middle"
+                  class="preview-text"
+                >
+                  {m.label}
+                </text>
+                {/* Pointer triangle from card toward marker */}
+                {m.above ? (
+                  <polygon points={`${m.x - 6},${m.py + PH} ${m.x + 6},${m.py + PH} ${m.x},${m.py + PH + 8}`} class="preview-pointer" />
+                ) : (
+                  <polygon points={`${m.x - 6},${m.py} ${m.x + 6},${m.py} ${m.x},${m.py - 8}`} class="preview-pointer" />
+                )}
+              </g>
 
-      <!-- India peninsula -->
-      <path d="M 685 200 Q 705 200 715 215 Q 720 240 712 260 Q 700 275 690 270 Q 678 250 680 230 Q 682 215 685 200 Z" />
+              {/* Marker itself */}
+              <circle cx={m.x} cy={m.y} r={m.status === 'past' ? 7 : 6} class="marker-dot" />
+              {m.status === 'upcoming' && (
+                <circle cx={m.x} cy={m.y} r={6} class="marker-ring" />
+              )}
+              <text x={m.x} y={m.y - 13} text-anchor="middle" class="marker-label">
+                {m.label}
+              </text>
+            </a>
+          ))
+        }
+      </g>
+    </svg>
 
-      <!-- Southeast Asia (Indonesia, etc.) -->
-      <path d="M 780 245 Q 815 240 840 250 Q 855 260 845 270 Q 815 280 790 275 Q 775 268 780 245 Z" />
-
-      <!-- Australia -->
-      <path d="M 815 320 Q 855 315 895 325 Q 910 340 895 360 Q 870 370 835 370 Q 810 365 805 350 Q 808 330 815 320 Z" />
-
-      <!-- Japan archipelago (small islands) -->
-      <path d="M 880 145 Q 890 140 895 150 Q 893 165 885 165 Q 878 158 880 145 Z" />
-      <path d="M 870 170 Q 878 168 882 178 Q 880 186 873 186 Q 868 178 870 170 Z" />
-
-      <!-- UK / Ireland -->
-      <path d="M 463 105 Q 470 100 478 105 Q 478 120 470 122 Q 463 118 463 105 Z" />
-
-      <!-- Madagascar -->
-      <path d="M 622 290 Q 628 290 632 300 Q 632 320 626 322 Q 622 315 622 290 Z" />
-    </g>
-
-    <!-- Markers -->
-    <g class="markers">
-      {
-        markers.map((m) => (
-          <a href={m.href} class={`marker marker--${m.status}`} aria-label={`${m.label} (${m.status})`}>
-            <circle cx={m.x} cy={m.y} r={m.status === 'past' ? 7 : 6} class="marker-dot" />
-            {m.status === 'upcoming' && (
-              <circle cx={m.x} cy={m.y} r={6} class="marker-ring" />
-            )}
-            <text x={m.x} y={m.y - 12} text-anchor="middle" class="marker-label">
-              {m.label}
-            </text>
-          </a>
-        ))
-      }
-    </g>
-  </svg>
-
-  <p class="legend">
-    <span class="legend-item"><span class="dot dot--past"></span> visited</span>
-    <span class="legend-sep">·</span>
-    <span class="legend-item"><span class="dot dot--upcoming"></span> planned</span>
-  </p>
-</div>
+    <p class="legend">
+      <span class="legend-item"><span class="dot dot--past"></span> visited</span>
+      <span class="legend-sep">·</span>
+      <span class="legend-item"><span class="dot dot--upcoming"></span> planned</span>
+      <span class="legend-sep">·</span>
+      <span class="legend-item-hint"><em>hover for preview, click to open</em></span>
+    </p>
+  </div>
+</figure>
 
 <style>
+  .map-figure {
+    margin: 0 0 2.5rem;
+  }
+
+  .map-caption {
+    text-align: center;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--c-warm-brown);
+    margin: 0 0 0.75rem;
+    letter-spacing: 0.04em;
+  }
+
+  .caption-text { padding: 0 0.75rem; }
+
+  /* Frame styled like an old atlas page — parchment with a real border. */
   .map-frame {
-    background: var(--c-cream-soft);
-    border: 1px solid var(--border-soft);
+    background: #D9C9A3;
+    border: 1px solid var(--border-strong);
     border-radius: 4px;
-    padding: clamp(0.75rem, 2vw, 1.5rem);
-    margin: 1.5rem 0 2.5rem;
+    padding: clamp(0.5rem, 1.5vw, 1rem);
+    box-shadow:
+      inset 0 0 0 1px rgba(74, 40, 24, 0.08),
+      inset 0 0 30px rgba(74, 40, 24, 0.05);
   }
 
   .map-svg {
     width: 100%;
     height: auto;
     display: block;
+    border-radius: 2px;
   }
 
   .graticule line {
-    stroke: var(--c-warm-brown);
+    stroke: #8B6038;
     stroke-width: 0.4;
     stroke-dasharray: 2 4;
-    opacity: 0.25;
+    opacity: 0.35;
   }
 
+  /* Continents painted as real land, not just outlines. */
   .continents path {
-    fill: var(--c-cream-deep);
-    stroke: var(--c-warm-brown);
-    stroke-width: 0.6;
+    fill: #B89868;
+    stroke: var(--c-espresso);
+    stroke-width: 0.8;
     stroke-linejoin: round;
-    opacity: 0.9;
+    opacity: 1;
   }
 
   .marker { cursor: pointer; }
+  .marker[href] { text-decoration: none; }
 
   .marker-dot {
     fill: var(--c-terracotta);
@@ -169,25 +249,69 @@ const markers = trips.map((trip) => {
     font-size: 13px;
     fill: var(--c-espresso);
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.15s ease;
     pointer-events: none;
+    paint-order: stroke;
+    stroke: var(--c-cream-soft);
+    stroke-width: 3;
   }
 
-  .marker:hover .marker-label,
-  .marker:focus .marker-label {
+  /* Preview card — hidden by default, fades in on hover/focus. */
+  .preview {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .preview-shadow {
+    fill: rgba(74, 40, 24, 0.25);
+  }
+
+  .preview-bg {
+    fill: var(--c-cream-soft);
+    stroke: var(--c-espresso);
+    stroke-width: 1;
+  }
+
+  .preview-pointer {
+    fill: var(--c-cream-soft);
+    stroke: var(--c-espresso);
+    stroke-width: 1;
+  }
+
+  .preview-text {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 12px;
+    fill: var(--c-espresso);
+    font-weight: 500;
+  }
+
+  /* On hover OR focus, reveal the preview & enlarge the dot, hide the
+     plain text label (we have the better one inside the card). */
+  .marker:hover .preview,
+  .marker:focus .preview {
     opacity: 1;
   }
 
   .marker:hover .marker-dot,
   .marker:focus .marker-dot {
-    transform: scale(1.3);
+    transform: scale(1.4);
   }
 
+  .marker:not(:hover):not(:focus) .marker-label {
+    opacity: 0;
+  }
+
+  .marker:hover .marker-label,
+  .marker:focus .marker-label {
+    opacity: 0;
+  }
+
+  /* Legend */
   .legend {
     text-align: center;
-    margin: 0.75rem 0 0;
+    margin: 0.85rem 0 0;
     font-size: 0.78rem;
-    font-style: italic;
     color: var(--c-warm-brown);
     letter-spacing: 0.04em;
   }
@@ -196,6 +320,12 @@ const markers = trips.map((trip) => {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+  }
+
+  .legend-item-hint {
+    font-style: italic;
+    color: var(--c-ink);
+    opacity: 0.75;
   }
 
   .dot {
@@ -215,5 +345,14 @@ const markers = trips.map((trip) => {
     border: 2px solid var(--c-terracotta);
   }
 
-  .legend-sep { margin: 0 0.6rem; opacity: 0.6; }
+  .legend-sep {
+    margin: 0 0.6rem;
+    opacity: 0.6;
+  }
+
+  /* On small screens, the hint clutters; hide it. */
+  @media (max-width: 600px) {
+    .legend-item-hint { display: none; }
+    .legend-sep:last-of-type { display: none; }
+  }
 </style>

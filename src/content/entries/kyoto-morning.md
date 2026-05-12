@@ -1,64 +1,14 @@
 ---
-title: A morning in Tampa, Fl.
-dek: Tamp
-publishDate: 2026-05-10
-location: Tampa, Fl.
-mode: writing
-heroPalette: ocean
-heroImage: /images/Tampa May 10, 2026, 12_21_45 PM.png
-heroAlt: “Sunrise is the golden sentence that proves the night was never the end.”
+title: "A morning in Kyoto"
+dek: "Hojicha, rain on the gravel, and a notebook I haven't opened in a month."
+publishDate: 2026-03-06
+location: "Kyoto"
+mode: "writing"
+heroPalette: "sage"
 ---
 
-T A M P A
+The hojicha came in a cup the colour of the rain outside — that toasted, slightly mineral brown that doesn't really exist in coffee, the kind of brown that knows it's a tea. The café is up a small staircase off Shijo and the woman who runs it has been there, by my rough count, longer than i've been writing.
 
-                    the sun lifts slowly,
+I open the notebook. The last thing in it is a sentence about a bridge in Buenos Aires, written in what looks like another person's handwriting. That's how it goes when you stop for too long — you have to meet your old self at a table and re-introduce yourselves.
 
-                 a golden thought from sleep,
-
-              and lays its trembling scripture
-
-            upon the calm, unbroken water.
-
-         I sit where the beach forgets its noise,
-
-      where Florida breathes in amber silence,
-
-   and the dawn, like some bright ghost of mercy,
-
-          touches every wave with fire.
-
-             My coffee sweats in the morning air,
-
-                  iced, bitter, faithful—
-
-                       a small dark moon
-
-                         in my hand,
-
-                            and I drink—
-
-                         not only its taste,
-
-                      but the glow,
-
-                   the hush,
-
-                the page,
-
-             the promise.
-
-          Another paragraph awakens.
-
-       Another chapter begins to believe.
-
-    For what is sunrise,
-
- if not God’s own epigram—
-
-     a single golden line
-
-        proving the night
-
-           was never
-
-              the end?
+The rain doesn't stop until lunchtime. By then I've written maybe three hundred words and crossed out two hundred of them. A good morning.

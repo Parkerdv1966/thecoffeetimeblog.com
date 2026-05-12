@@ -10,29 +10,25 @@
 
 backend:
   name: github
-  repo: Parkerdv1966/thecoffeetimeblog.com
+  repo: YOUR-GITHUB-USERNAME/YOUR-REPO-NAME
   branch: main
   # Default: Sveltia's hosted auth at auth.sveltia.app
-  # Replace with your own Worker URL if you self-host the OAuth proxy.
   # base_url: https://your-oauth-proxy.workers.dev
 
-site_url: https://www.thecoffeetimeblog.com
-display_url: https://www.thecoffeetimeblog.com
+site_url: https://thecoffeetimeblog.com
+display_url: https://thecoffeetimeblog.com
 logo_url: /favicon.svg
 
-# Where Sveltia uploads images. They get committed to public/images/
-# and served at /images/...
 media_folder: public/images
 public_folder: /images
 
-# Make new files use a clean URL slug.
 slug:
   encoding: ascii
   clean_accents: true
 
 collections:
   # --------------------------------------------------------------------
-  # Journal entries — the daily/essay feed on the homepage
+  # Journal entries
   # --------------------------------------------------------------------
   - name: entries
     label: Journal entries
@@ -53,7 +49,7 @@ collections:
         format: "YYYY-MM-DD"
         date_format: "YYYY-MM-DD"
         time_format: false
-      - { label: Location, name: location, widget: string, hint: "City name, e.g. Lisbon" }
+      - { label: Location, name: location, widget: string, hint: "City name, e.g. Lisbon — must match a trip's location to link them" }
       - label: Mode
         name: mode
         widget: select
@@ -67,11 +63,32 @@ collections:
         hint: "Used when no hero image is uploaded"
       - { label: Hero image, name: heroImage, widget: image, required: false, hint: "Optional — overrides palette block" }
       - { label: Hero alt text, name: heroAlt, widget: string, required: false }
+      - label: Hero position
+        name: heroPosition
+        widget: select
+        options: [center, top, bottom, left, right]
+        default: center
+        hint: "Which part of the image to keep when cropped. Use 'top' for sky/skyline photos."
+      - label: Photos (1–3)
+        name: photos
+        widget: list
+        required: false
+        max: 3
+        summary: "{{fields.image}}"
+        field: { label: Image, name: image, widget: image }
+        hint: "Optional gallery shown after the body. 1 photo = full width, 2 = side by side, 3 = triptych."
+      - label: Photo alt text (1–3)
+        name: photoAlts
+        widget: list
+        required: false
+        max: 3
+        field: { label: Alt text, name: alt, widget: string }
+        hint: "Optional — one alt text per photo above, in the same order"
       - { label: Draft, name: draft, widget: boolean, default: false }
       - { label: Body, name: body, widget: markdown }
 
   # --------------------------------------------------------------------
-  # Trips — destinations shown on the travel page + map
+  # Trips
   # --------------------------------------------------------------------
   - name: trips
     label: Trips
@@ -85,7 +102,7 @@ collections:
     sortable_fields: [startDate, title, location]
     fields:
       - { label: Title, name: title, widget: string, hint: "e.g. Lisbon, October 2026" }
-      - { label: City / location, name: location, widget: string }
+      - { label: City / location, name: location, widget: string, hint: "Match this to entry locations to link related journal entries" }
       - { label: Country, name: country, widget: string }
       - label: Coordinates
         name: coordinates
@@ -117,17 +134,23 @@ collections:
         widget: select
         options: [terracotta, sage, ocean, gold, espresso]
         default: terracotta
-      - { label: Cover image, name: coverImage, widget: image, required: false }
+      - { label: Cover image, name: coverImage, widget: image, required: false, hint: "Shown on the trip page hero and as the hover preview on the map" }
+      - label: Cover position
+        name: coverPosition
+        widget: select
+        options: [center, top, bottom, left, right]
+        default: center
       - label: Photos
         name: photos
         widget: list
         required: false
         field: { label: Image, name: image, widget: image }
+        hint: "Gallery on the trip's detail page. Any number of photos."
       - { label: Draft, name: draft, widget: boolean, default: false }
       - { label: Body, name: body, widget: markdown }
 
   # --------------------------------------------------------------------
-  # Works — books, stories, essays in progress and finished
+  # Works
   # --------------------------------------------------------------------
   - name: works
     label: Works
@@ -163,18 +186,17 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: false
         required: false
-      - { label: Excerpt, name: excerpt, widget: text, required: false, hint: "Short quote pulled from the work" }
-      - { label: Note, name: note, widget: text, hint: "What this is about, where you are with it" }
+      - { label: Excerpt, name: excerpt, widget: text, required: false }
+      - { label: Note, name: note, widget: text }
       - { label: Cover image, name: coverImage, widget: image, required: false }
       - label: Cover palette
         name: coverPalette
         widget: select
         options: [terracotta, sage, ocean, gold, espresso]
         default: espresso
-      - { label: Display order, name: order, widget: number, value_type: int, required: false, hint: "Lower numbers appear first; leave blank to use default ordering" }
+      - { label: Display order, name: order, widget: number, value_type: int, required: false }
       - { label: Draft, name: draft, widget: boolean, default: false }
       - label: Body
         name: body
         widget: markdown
         required: false
-        hint: "Optional longer description"

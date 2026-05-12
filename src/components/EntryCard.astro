@@ -7,8 +7,17 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title, mode, publishDate, location, dek, heroPalette, heroImage, heroAlt } =
-  entry.data;
+const {
+  title,
+  mode,
+  publishDate,
+  location,
+  dek,
+  heroPalette,
+  heroImage,
+  heroAlt,
+  heroPosition,
+} = entry.data;
 const day = formatDay(publishDate);
 ---
 
@@ -20,6 +29,7 @@ const day = formatDay(publishDate);
           src={heroImage}
           alt={heroAlt ?? title}
           class="card-img"
+          style={`object-position: ${heroPosition};`}
           loading="lazy"
         />
       ) : (
@@ -47,10 +57,7 @@ const day = formatDay(publishDate);
   }
 
   .card-link:hover { color: inherit; }
-
-  .card-link:hover .title {
-    color: var(--c-terracotta-deep);
-  }
+  .card-link:hover .title { color: var(--c-terracotta-deep); }
 
   .hero, .card-img {
     aspect-ratio: 16 / 10;

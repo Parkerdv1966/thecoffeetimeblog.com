@@ -1,8 +1,8 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import WorldMap from '../components/WorldMap.astro';
-import TripCard from '../components/TripCard.astro';
-import Ornament from '../components/Ornament.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WorldMap from '../../components/WorldMap.astro';
+import TripCard from '../../components/TripCard.astro';
+import Ornament from '../../components/Ornament.astro';
 import { getCollection } from 'astro:content';
 
 const allTrips = (await getCollection('trips', ({ data }) => !data.draft)).sort(

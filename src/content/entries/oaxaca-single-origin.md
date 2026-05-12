@@ -1,11 +1,10 @@
 ---
-title: Single origin in Oaxaca
-dek: A washed Pluma Hidalgo, and what a morning sounds like before it decides anything.
-publishDate: 2024-02-06
-location: Oaxaca
-mode: café
-heroPalette: gold
-heroAlt: ''
+title: "Single origin in Oaxaca"
+dek: "A washed Pluma Hidalgo, and what a morning sounds like before it decides anything."
+publishDate: 2026-02-22
+location: "Oaxaca"
+mode: "café"
+heroPalette: "gold"
 ---
 
 A washed Pluma — bright, almost citric, like a morning that hasn't decided yet whether to be cold or warm. The roaster brought it out in a small white cup the colour of nothing in particular, which is the right colour for a coffee like this, where the cup should disappear and leave you only the drink.

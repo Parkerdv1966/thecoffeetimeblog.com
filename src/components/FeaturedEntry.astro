@@ -7,7 +7,16 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title, dek, mode: _mode, publishDate, location, heroPalette, heroImage, heroAlt } = entry.data;
+const {
+  title,
+  dek,
+  publishDate,
+  location,
+  heroPalette,
+  heroImage,
+  heroAlt,
+  heroPosition,
+} = entry.data;
 const day = formatDay(publishDate);
 ---
 
@@ -20,6 +29,7 @@ const day = formatDay(publishDate);
           src={heroImage}
           alt={heroAlt ?? title}
           class="featured-img"
+          style={`object-position: ${heroPosition};`}
           loading="eager"
         />
       ) : (
@@ -59,12 +69,14 @@ const day = formatDay(publishDate);
 
   .hero-link:hover, .title-link:hover { color: inherit; }
 
+  /* Slightly less wide than the original 16:7 — leaves more vertical
+     room for sky / horizon / sun, so the top of the image isn't cut. */
   .hero--featured {
-    aspect-ratio: 16 / 7;
+    aspect-ratio: 16 / 9;
   }
 
   .featured-img {
-    aspect-ratio: 16 / 7;
+    aspect-ratio: 16 / 9;
     width: 100%;
     object-fit: cover;
     display: block;

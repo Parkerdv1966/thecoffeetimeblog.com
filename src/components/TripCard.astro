@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { render } from 'astro:content';
+import { render, getCollection } from 'astro:content';
 import { formatLongDate } from '../lib/format';
 
 interface Props {
@@ -8,19 +8,34 @@ interface Props {
 }
 
 const { trip } = Astro.props;
-const { title, location, country, startDate, endDate, status, coverPalette, coverImage, photos } =
-  trip.data;
+const {
+  title,
+  location,
+  country,
+  startDate,
+  endDate,
+  status,
+  coverPalette,
+  coverImage,
+  coverPosition,
+} = trip.data;
 
 const { Content } = await render(trip);
 
 const dateRange = endDate
   ? `${formatLongDate(startDate)} — ${formatLongDate(endDate)}`
   : formatLongDate(startDate);
+
+const href = `/travels/${trip.id}`;
+
+// Count related entries so we can label the link accurately.
+const allEntries = await getCollection('entries', ({ data }) => !data.draft);
+const relatedCount = allEntries.filter(
+  (e) => e.data.location.trim().toLowerCase() === location.trim().toLowerCase(),
+).length;
 ---
 
 <article class="trip" id={`trip-${trip.id}`}>
-  <a href={`#trip-${trip.id}`} class="anchor" aria-hidden="true"></a>
-
   <header class="trip-header">
     <p class="meta">
       <span class="status" data-status={status}>
@@ -29,33 +44,41 @@ const dateRange = endDate
       <span class="sep">·</span>
       <span>{dateRange}</span>
     </p>
-    <h2 class="title">{title}</h2>
-    <p class="location">
-      <em>{location}, {country}</em>
-    </p>
+    <a href={href} class="title-link">
+      <h2 class="title">{title}</h2>
+    </a>
+    <p class="location"><em>{location}, {country}</em></p>
   </header>
 
-  {
-    coverImage ? (
-      <img src={coverImage} alt={`${location}, ${country}`} class="cover" loading="lazy" />
-    ) : (
-      <div class:list={['cover hero', `hero--${coverPalette}`]} aria-hidden="true" />
-    )
-  }
+  <a href={href} class="cover-link">
+    {
+      coverImage ? (
+        <img
+          src={coverImage}
+          alt={`${location}, ${country}`}
+          class="cover-img"
+          style={`object-position: ${coverPosition};`}
+          loading="lazy"
+        />
+      ) : (
+        <div class:list={['cover hero', `hero--${coverPalette}`]} aria-hidden="true" />
+      )
+    }
+  </a>
 
   <div class="trip-body prose">
     <Content />
   </div>
 
-  {
-    photos && photos.length > 0 && (
-      <div class:list={['photos', `photos--${photos.length === 1 ? 'one' : 'grid'}`]}>
-        {photos.map((src) => (
-          <img src={src} alt={`${location}`} class="photo" loading="lazy" />
-        ))}
-      </div>
-    )
-  }
+  <p class="see-more">
+    <a href={href}>
+      {
+        relatedCount > 0
+          ? `see photos & ${relatedCount} journal ${relatedCount === 1 ? 'entry' : 'entries'} →`
+          : 'see photos →'
+      }
+    </a>
+  </p>
 </article>
 
 <style>
@@ -67,14 +90,7 @@ const dateRange = endDate
 
   .trip:last-child { border-bottom: none; }
 
-  .anchor {
-    position: absolute;
-    visibility: hidden;
-  }
-
-  .trip-header {
-    margin-bottom: 1.25rem;
-  }
+  .trip-header { margin-bottom: 1.25rem; }
 
   .meta {
     font-style: italic;
@@ -84,10 +100,21 @@ const dateRange = endDate
     margin: 0 0 0.5rem;
   }
 
-  .status[data-status="past"] { color: var(--c-terracotta-deep); }
-  .status[data-status="upcoming"] { color: var(--c-ink); }
-
+  .status[data-status="past"] { color: var(--c-terracotta-deep); font-weight: 500; }
+  .status[data-status="upcoming"] { color: var(--c-ink); font-weight: 500; }
   .sep { color: var(--c-warm-brown); margin: 0 0.4rem; }
+
+  .title-link, .cover-link {
+    display: block;
+    border: none;
+    color: inherit;
+  }
+
+  .title-link:hover, .cover-link:hover { color: inherit; }
+
+  .title-link:hover .title {
+    color: var(--c-terracotta-deep);
+  }
 
   .title {
     font-family: var(--font-display);
@@ -96,6 +123,8 @@ const dateRange = endDate
     color: var(--c-espresso);
     margin: 0 0 0.4rem;
     line-height: 1.2;
+    transition: color 0.2s ease;
+    text-wrap: balance;
   }
 
   .location {
@@ -104,7 +133,7 @@ const dateRange = endDate
     color: var(--c-warm-brown);
   }
 
-  .cover {
+  .cover, .cover-img {
     aspect-ratio: 16 / 7;
     width: 100%;
     margin: 1.5rem 0;
@@ -118,23 +147,19 @@ const dateRange = endDate
     line-height: 1.75;
   }
 
-  .photos {
-    display: grid;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
+  .see-more {
+    margin: 1.25rem 0 0;
+    font-style: italic;
+    font-size: 0.95rem;
   }
 
-  .photos--one { grid-template-columns: 1fr; }
-  .photos--grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  .see-more a {
+    color: var(--c-ink);
+    border-bottom: none;
   }
 
-  .photo {
-    width: 100%;
-    height: auto;
-    border-radius: 2px;
-    object-fit: cover;
-    aspect-ratio: 4 / 3;
+  .see-more a:hover {
+    color: var(--c-terracotta-deep);
   }
 
   @media (max-width: 640px) {

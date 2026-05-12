@@ -12,7 +12,18 @@ interface Props {
 }
 
 const { entry, prev, next } = Astro.props;
-const { title, dek, publishDate, location, heroPalette, heroImage, heroAlt } = entry.data;
+const {
+  title,
+  dek,
+  publishDate,
+  location,
+  heroPalette,
+  heroImage,
+  heroAlt,
+  heroPosition,
+  photos,
+  photoAlts,
+} = entry.data;
 const dateline = formatDateline(publishDate, location);
 ---
 
@@ -24,6 +35,7 @@ const dateline = formatDateline(publishDate, location);
           src={heroImage}
           alt={heroAlt ?? title}
           class="entry-hero-img"
+          style={`object-position: ${heroPosition};`}
           loading="eager"
         />
       ) : (
@@ -43,6 +55,20 @@ const dateline = formatDateline(publishDate, location);
       <slot />
     </div>
 
+    {
+      photos && photos.length > 0 && (
+        <div class={`photos photos--${photos.length}`}>
+          {photos.map((src, i) => (
+            <img
+              src={src}
+              alt={photoAlts?.[i] ?? `${location} — ${i + 1}`}
+              loading="lazy"
+            />
+          ))}
+        </div>
+      )
+    }
+
     <Ornament spacing="wide" />
   </article>
 
@@ -55,9 +81,11 @@ const dateline = formatDateline(publishDate, location);
     margin-inline: auto;
   }
 
+  /* Same widening to 16/9 here — less aggressive crop on the top of
+     the image, more room for sky / horizon / faces. */
   .hero--post,
   .entry-hero-img {
-    aspect-ratio: 16 / 7;
+    aspect-ratio: 16 / 9;
     width: 100%;
     margin: 0;
     border-radius: 0;
@@ -106,9 +134,10 @@ const dateline = formatDateline(publishDate, location);
     padding: 0 clamp(1rem, 5vw, 2.5rem);
   }
 
-  .prose p {
-    hyphens: auto;
-    -webkit-hyphens: auto;
-    overflow-wrap: break-word;
+  /* Constrain the gallery so it doesn't run edge-to-edge */
+  .photos {
+    max-width: var(--measure-wide);
+    margin-inline: auto;
+    padding: 0 clamp(1rem, 5vw, 2.5rem);
   }
 </style>
