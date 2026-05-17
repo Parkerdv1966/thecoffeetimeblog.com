@@ -68,8 +68,8 @@ const markers = trips.map((trip) => {
   <div class="map-frame">
     <img
       src="/images/world-map.png"
-      alt="A stylized world map fallback image"
-      class="map-fallback"
+      alt="A stylized world map"
+      class="map-background"
       loading="lazy"
     />
 
@@ -81,37 +81,6 @@ const markers = trips.map((trip) => {
       role="img"
       aria-label="World map showing trip destinations"
     >
-      <!-- Ocean -->
-      <rect width="1000" height="500" fill="#D9C9A3" />
-
-      <!-- Subtle latitude/longitude grid -->
-      <g class="graticule" aria-hidden="true">
-        <line x1="0" y1="125" x2="1000" y2="125" />
-        <line x1="0" y1="250" x2="1000" y2="250" />
-        <line x1="0" y1="375" x2="1000" y2="375" />
-        <line x1="250" y1="0" x2="250" y2="500" />
-        <line x1="500" y1="0" x2="500" y2="500" />
-        <line x1="750" y1="0" x2="750" y2="500" />
-      </g>
-
-      <!-- Equator (slightly stronger) -->
-      <line x1="0" y1="250" x2="1000" y2="250" stroke="#8B6038" stroke-width="0.6" stroke-dasharray="6 6" opacity="0.5" />
-
-      <!-- Continents -->
-      <g class="continents" aria-hidden="true">
-        <path d="M 80 70 Q 130 45 220 50 L 320 55 Q 365 65 380 90 Q 365 110 340 125 Q 325 155 305 175 Q 285 200 265 220 L 240 220 Q 220 200 200 185 Q 165 170 135 145 Q 100 120 85 95 Q 75 80 80 70 Z" />
-        <path d="M 285 230 Q 320 225 350 240 Q 365 270 360 320 Q 350 365 330 400 L 305 430 Q 290 440 280 425 Q 268 395 268 360 L 270 305 Q 273 265 285 230 Z" />
-        <path d="M 470 80 Q 510 70 555 75 Q 595 80 605 100 Q 600 125 575 140 Q 540 150 510 145 Q 480 140 472 120 Q 465 95 470 80 Z" />
-        <path d="M 490 150 Q 535 145 580 155 L 615 175 Q 630 215 622 260 Q 612 305 595 345 Q 575 375 545 380 Q 515 375 500 350 Q 488 315 484 280 Q 480 235 482 195 Q 484 165 490 150 Z" />
-        <path d="M 600 65 Q 690 50 780 55 Q 860 60 905 80 Q 935 105 935 140 Q 920 170 880 180 L 830 185 Q 800 200 775 200 Q 745 215 735 245 L 720 260 Q 695 260 680 245 Q 660 225 640 215 Q 615 205 605 180 Q 600 145 600 110 Q 600 85 600 65 Z" />
-        <path d="M 685 200 Q 705 200 715 215 Q 720 240 712 260 Q 700 275 690 270 Q 678 250 680 230 Q 682 215 685 200 Z" />
-        <path d="M 780 245 Q 815 240 840 250 Q 855 260 845 270 Q 815 280 790 275 Q 775 268 780 245 Z" />
-        <path d="M 815 320 Q 855 315 895 325 Q 910 340 895 360 Q 870 370 835 370 Q 810 365 805 350 Q 808 330 815 320 Z" />
-        <path d="M 880 145 Q 890 140 895 150 Q 893 165 885 165 Q 878 158 880 145 Z" />
-        <path d="M 870 170 Q 878 168 882 178 Q 880 186 873 186 Q 868 178 870 170 Z" />
-        <path d="M 463 105 Q 470 100 478 105 Q 478 120 470 122 Q 463 118 463 105 Z" />
-        <path d="M 622 290 Q 628 290 632 300 Q 632 320 626 322 Q 622 315 622 290 Z" />
-      </g>
 
       <!-- Markers + previews -->
       <g class="markers">
@@ -203,16 +172,18 @@ const markers = trips.map((trip) => {
       inset 0 0 30px rgba(74, 40, 24, 0.05);
   }
 
-  .map-fallback {
+  .map-background {
     position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    overflow: hidden;
-    pointer-events: none;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 0;
   }
 
   .map-svg {
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: auto;
     display: block;
