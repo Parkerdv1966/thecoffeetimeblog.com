@@ -1,19 +1,26 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
 # ----------------------------------------------------------------------
 # Sveltia CMS configuration for the coffee time blog
 # ----------------------------------------------------------------------
-# Before this works, you must:
-#   1. Replace YOUR-GITHUB-USERNAME and YOUR-REPO-NAME below
-#   2. Create a GitHub OAuth App (see README → Setting up the admin)
-#   3. Either use Sveltia's hosted auth (default) or deploy your own
-#      Cloudflare Worker proxy and point base_url to it.
+#
+# AUTHENTICATION
+# This config uses GitHub backend with Personal Access Token (PAT) auth
+# by default. No OAuth proxy required.
+#
+# When you visit /admin, click the small arrow next to the "Sign In"
+# button and choose "Sign In with Token". Sveltia provides a link to
+# GitHub that pre-selects the right scopes.
+#
+# To use the regular OAuth "Sign In with GitHub" button instead, deploy
+# the sveltia-cms-auth Worker (https://github.com/sveltia/sveltia-cms-auth)
+# and uncomment the `base_url` line below.
 # ----------------------------------------------------------------------
 
 backend:
   name: github
-  repo: YOUR-GITHUB-USERNAME/YOUR-REPO-NAME
+  repo: Parkerdv1966/thecoffeetimeblog.com
   branch: main
-  # Default: Sveltia's hosted auth at auth.sveltia.app
-  # base_url: https://your-oauth-proxy.workers.dev
+  # base_url: https://your-sveltia-cms-auth.workers.dev   # uncomment if using OAuth Worker
 
 site_url: https://thecoffeetimeblog.com
 display_url: https://thecoffeetimeblog.com
@@ -145,7 +152,7 @@ collections:
         widget: list
         required: false
         field: { label: Image, name: image, widget: image }
-        hint: "Gallery on the trip's detail page. Any number of photos."
+        hint: "Gallery on the trip's detail page"
       - { label: Draft, name: draft, widget: boolean, default: false }
       - { label: Body, name: body, widget: markdown }
 
