@@ -66,6 +66,13 @@ const markers = trips.map((trip) => {
   </figcaption>
 
   <div class="map-frame">
+    <img
+      src="/images/world-map.png"
+      alt="A stylized world map fallback image"
+      class="map-fallback"
+      loading="lazy"
+    />
+
     <svg
       viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
       xmlns="http://www.w3.org/2000/svg"
@@ -186,6 +193,7 @@ const markers = trips.map((trip) => {
 
   /* Frame styled like an old atlas page — parchment with a real border. */
   .map-frame {
+    position: relative;
     background: #D9C9A3;
     border: 1px solid var(--border-strong);
     border-radius: 4px;
@@ -193,6 +201,15 @@ const markers = trips.map((trip) => {
     box-shadow:
       inset 0 0 0 1px rgba(74, 40, 24, 0.08),
       inset 0 0 30px rgba(74, 40, 24, 0.05);
+  }
+
+  .map-fallback {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
   }
 
   .map-svg {
