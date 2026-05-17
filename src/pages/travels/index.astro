@@ -5,12 +5,15 @@ import TripCard from '../../components/TripCard.astro';
 import Ornament from '../../components/Ornament.astro';
 import { getCollection } from 'astro:content';
 
-const allTrips = (await getCollection('trips', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.startDate.valueOf() - a.data.startDate.valueOf(),
-);
+const allTrips = await getCollection('trips', ({ data }) => !data.draft);
 
-const past = allTrips.filter((t) => t.data.status === 'past');
-const upcoming = allTrips.filter((t) => t.data.status === 'upcoming');
+const past = allTrips
+  .filter((t) => t.data.status === 'past')
+  .sort((a, b) => b.data.startDate.valueOf() - a.data.startDate.valueOf());
+
+const upcoming = allTrips
+  .filter((t) => t.data.status === 'upcoming')
+  .sort((a, b) => a.data.startDate.valueOf() - b.data.startDate.valueOf());
 ---
 
 <BaseLayout title="travels" compact={true}>
