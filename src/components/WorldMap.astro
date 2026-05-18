@@ -3,15 +3,47 @@ import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   trips: CollectionEntry<'trips'>[];
+  mapImage?: string;
+  heightMode?: 'natural' | 'shorter' | 'shortest';
+  focalPoint?: 'center' | 'top' | 'bottom';
+  pastMarkerSize?: 'small' | 'medium' | 'large';
+  upcomingMarkerSize?: 'small' | 'medium' | 'large';
+  showFrame?: boolean;
 }
 
-const { trips } = Astro.props;
+const {
+  trips,
+  mapImage = '/images/world-map.png',
+  heightMode = 'natural',
+  focalPoint = 'center',
+  pastMarkerSize = 'medium',
+  upcomingMarkerSize = 'medium',
+  showFrame = true,
+} = Astro.props;
 
 const VIEW_W = 1000;
 const VIEW_H = 500;
 
-// Hex fills matching the colored hero blocks — used as fallback preview
-// when a trip has no coverImage.
+// Marker radii from size names
+const PAST_R     = { small: 5, medium: 7, large: 9 }[pastMarkerSize];
+const UPCOMING_R = { small: 4, medium: 6, large: 8 }[upcomingMarkerSize];
+
+// Map block aspect ratio (CSS) — controls how much vertical space the
+// rendered map takes. Projection math stays 2:1 because the SVG viewBox
+// is fixed; this just crops the rendered area.
+const aspectCss = {
+  natural:  '2 / 1',
+  shorter:  '5 / 2',
+  shortest: '3 / 1',
+}[heightMode];
+
+// preserveAspectRatio alignment based on focal point.
+// "slice" = cover-style fit (no letterboxing, crops the overflow).
+const preserveAR =
+  focalPoint === 'top'    ? 'xMidYMin slice' :
+  focalPoint === 'bottom' ? 'xMidYMax slice' :
+                            'xMidYMid slice';
+
 const paletteFill: Record<string, string> = {
   terracotta: '#C46B47',
   sage:       '#6B7F5C',
@@ -20,7 +52,9 @@ const paletteFill: Record<string, string> = {
   espresso:   '#5B3A22',
 };
 
-// Equirectangular projection.
+// Equirectangular projection: lat/lng → x/y in the viewBox.
+// Works correctly as long as the background image is also equirectangular
+// (2:1 aspect ratio, evenly spaced lat/lng across the image).
 function project(lat: number, lng: number) {
   const x = ((lng + 180) / 360) * VIEW_W;
   const y = ((90 - lat) / 180) * VIEW_H;
@@ -34,12 +68,10 @@ const PH = 90;
 const markers = trips.map((trip) => {
   const { x, y } = project(trip.data.coordinates.lat, trip.data.coordinates.lng);
 
-  // Decide whether the preview floats above or below the marker.
   const above = y > 130;
   let px = x - PW / 2;
   let py = above ? y - PH - 18 : y + 18;
 
-  // Clamp horizontally so the preview doesn't escape the viewBox.
   if (px < 4) px = 4;
   if (px + PW > VIEW_W - 4) px = VIEW_W - PW - 4;
 
@@ -65,29 +97,35 @@ const markers = trips.map((trip) => {
     <span class="caption-text">a map of where i've been &amp; where i'm going</span>
   </figcaption>
 
-  <div class="map-frame">
-    <img
-      src="/images/world-map.png"
-      alt="A stylized world map"
-      class="map-background"
-      loading="lazy"
-    />
-
+  <div class:list={['map-frame', { 'map-frame--bare': !showFrame }]} style={`aspect-ratio: ${aspectCss};`}>
     <svg
       viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
       xmlns="http://www.w3.org/2000/svg"
       class="map-svg"
-      preserveAspectRatio="xMidYMid meet"
+      preserveAspectRatio={preserveAR}
       role="img"
       aria-label="World map showing trip destinations"
     >
+      <!-- Parchment fallback fill in case the image fails to load -->
+      <rect width="1000" height="500" fill="#D9C9A3" />
+
+      <!-- The world map image. Path comes from src/data/map-settings.json,
+           editable via the admin. Must be 2:1 equirectangular for markers to
+           land in geographically correct places. -->
+      <image
+        href={mapImage}
+        x="0"
+        y="0"
+        width="1000"
+        height="500"
+        preserveAspectRatio="none"
+      />
 
       <!-- Markers + previews -->
       <g class="markers">
         {
           markers.map((m) => (
             <a href={m.href} class={`marker marker--${m.status}`} aria-label={`${m.label}, ${m.country} (${m.status === 'past' ? 'visited' : 'planned'})`}>
-              {/* Preview card — invisible until the marker is hovered/focused */}
               <g class="preview" pointer-events="none">
                 <rect x={m.px - 2} y={m.py - 2} width={PW + 4} height={PH + 4} class="preview-shadow" />
                 <rect x={m.px} y={m.py} width={PW} height={PH} class="preview-bg" />
@@ -111,7 +149,6 @@ const markers = trips.map((trip) => {
                 >
                   {m.label}
                 </text>
-                {/* Pointer triangle from card toward marker */}
                 {m.above ? (
                   <polygon points={`${m.x - 6},${m.py + PH} ${m.x + 6},${m.py + PH} ${m.x},${m.py + PH + 8}`} class="preview-pointer" />
                 ) : (
@@ -119,10 +156,9 @@ const markers = trips.map((trip) => {
                 )}
               </g>
 
-              {/* Marker itself */}
-              <circle cx={m.x} cy={m.y} r={m.status === 'past' ? 7 : 6} class="marker-dot" />
+              <circle cx={m.x} cy={m.y} r={m.status === 'past' ? PAST_R : UPCOMING_R} class="marker-dot" />
               {m.status === 'upcoming' && (
-                <circle cx={m.x} cy={m.y} r={6} class="marker-ring" />
+                <circle cx={m.x} cy={m.y} r={UPCOMING_R} class="marker-ring" />
               )}
               <text x={m.x} y={m.y - 13} text-anchor="middle" class="marker-label">
                 {m.label}
@@ -160,9 +196,9 @@ const markers = trips.map((trip) => {
 
   .caption-text { padding: 0 0.75rem; }
 
-  /* Frame styled like an old atlas page — parchment with a real border. */
+  /* Frame around the map — gives it presence and contains it
+     visually whether the image is loaded or not. */
   .map-frame {
-    position: relative;
     background: #D9C9A3;
     border: 1px solid var(--border-strong);
     border-radius: 4px;
@@ -170,45 +206,29 @@ const markers = trips.map((trip) => {
     box-shadow:
       inset 0 0 0 1px rgba(74, 40, 24, 0.08),
       inset 0 0 30px rgba(74, 40, 24, 0.05);
+    overflow: hidden;
   }
 
-  .map-background {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    z-index: 0;
+  .map-frame--bare {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
   }
 
   .map-svg {
-    position: relative;
-    z-index: 1;
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
     border-radius: 2px;
-  }
-
-  .graticule line {
-    stroke: #8B6038;
-    stroke-width: 0.4;
-    stroke-dasharray: 2 4;
-    opacity: 0.35;
-  }
-
-  /* Continents painted as real land, not just outlines. */
-  .continents path {
-    fill: #B89868;
-    stroke: var(--c-espresso);
-    stroke-width: 0.8;
-    stroke-linejoin: round;
-    opacity: 1;
   }
 
   .marker { cursor: pointer; }
   .marker[href] { text-decoration: none; }
 
+  /* Markers — terracotta with a cream halo so they read clearly on
+     any background, including the vintage map's sepia tones. */
   .marker-dot {
     fill: var(--c-terracotta);
     stroke: var(--c-cream-soft);
@@ -216,6 +236,7 @@ const markers = trips.map((trip) => {
     transition: transform 0.2s ease;
     transform-origin: center;
     transform-box: fill-box;
+    filter: drop-shadow(0 1px 2px rgba(74, 40, 24, 0.4));
   }
 
   .marker--upcoming .marker-dot {
@@ -244,7 +265,6 @@ const markers = trips.map((trip) => {
     stroke-width: 3;
   }
 
-  /* Preview card — hidden by default, fades in on hover/focus. */
   .preview {
     opacity: 0;
     transition: opacity 0.2s ease;
@@ -274,8 +294,6 @@ const markers = trips.map((trip) => {
     font-weight: 500;
   }
 
-  /* On hover OR focus, reveal the preview & enlarge the dot, hide the
-     plain text label (we have the better one inside the card). */
   .marker:hover .preview,
   .marker:focus .preview {
     opacity: 1;
@@ -295,7 +313,6 @@ const markers = trips.map((trip) => {
     opacity: 0;
   }
 
-  /* Legend */
   .legend {
     text-align: center;
     margin: 0.85rem 0 0;
@@ -338,7 +355,6 @@ const markers = trips.map((trip) => {
     opacity: 0.6;
   }
 
-  /* On small screens, the hint clutters; hide it. */
   @media (max-width: 600px) {
     .legend-item-hint { display: none; }
     .legend-sep:last-of-type { display: none; }

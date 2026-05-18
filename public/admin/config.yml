@@ -35,6 +35,50 @@ slug:
 
 collections:
   # --------------------------------------------------------------------
+  # Travel map settings (singleton — controls the world map on /travels)
+  # --------------------------------------------------------------------
+  - name: settings
+    label: Site settings
+    files:
+      - label: Travel map
+        name: map-settings
+        file: src/data/map-settings.json
+        format: json
+        fields:
+          - label: Map image
+            name: mapImage
+            widget: image
+            default: /images/world-map.png
+            hint: "World map background. Must be 2:1 equirectangular for markers to land in geographically correct spots."
+          - label: Height mode
+            name: heightMode
+            widget: select
+            options: [natural, shorter, shortest]
+            default: natural
+            hint: "natural = 2:1 (full image, default), shorter = 5:2 (trims poles), shortest = 3:1 (trims more)"
+          - label: Focal point
+            name: focalPoint
+            widget: select
+            options: [center, top, bottom]
+            default: center
+            hint: "Which part of the image to keep visible when 'Height mode' is not 'natural'"
+          - label: Past trip marker size
+            name: pastMarkerSize
+            widget: select
+            options: [small, medium, large]
+            default: medium
+          - label: Upcoming trip marker size
+            name: upcomingMarkerSize
+            widget: select
+            options: [small, medium, large]
+            default: medium
+          - label: Show parchment frame
+            name: showFrame
+            widget: boolean
+            default: true
+            hint: "Border and parchment background around the map"
+
+  # --------------------------------------------------------------------
   # Journal entries
   # --------------------------------------------------------------------
   - name: entries

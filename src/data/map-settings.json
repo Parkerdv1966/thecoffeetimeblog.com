@@ -1,0 +1,8 @@
+{
+  "mapImage": "/images/world-map.png",
+  "heightMode": "natural",
+  "focalPoint": "center",
+  "pastMarkerSize": "medium",
+  "upcomingMarkerSize": "medium",
+  "showFrame": true
+}
