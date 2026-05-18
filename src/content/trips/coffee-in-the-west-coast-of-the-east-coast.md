@@ -9,7 +9,7 @@ startDate: 2026-05-18
 endDate: ''
 status: past
 coverPalette: terracotta
-coverImage: ''
+coverImage: /images/Tampa May 10, 2026, 12_21_45 PM.png
 coverPosition: center
 photos: []
 draft: false
